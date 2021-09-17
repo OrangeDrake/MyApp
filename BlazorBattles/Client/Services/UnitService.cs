@@ -1,8 +1,10 @@
-﻿using BlazorBattles.Client.Shared;
+﻿using BlazorBattles.Shared;
 using Blazored.Toast.Services;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net.Http;
+using System.Net.Http.Json;
 using System.Threading.Tasks;
 
 namespace BlazorBattles.Client.Services
@@ -10,27 +12,69 @@ namespace BlazorBattles.Client.Services
     public class UnitService : IUnitService
     {
         private readonly IToastService _toastService;
-        public UnitService (IToastService toastService)
+        private readonly HttpClient _http;
+        private readonly IBananaService _bananaService;
+
+        public UnitService (IToastService toastService, HttpClient http, IBananaService bananaService)
         {
             _toastService = toastService;
+            _http = http;
+            _bananaService = bananaService;
         }
-        public IList<Unit> Units => new List<Unit>
-        {
-            new Unit { Id = 1, Title = "Knight", Attack = 10, Defense = 10, BanaCost = 100 },
-            new Unit { Id = 2, Title = "Archr", Attack = 15, Defense = 5, BanaCost = 150 },
-            new Unit { Id = 3, Title = "Mag", Attack = 20, Defense = 1, BanaCost = 200 }
-        };
+        public IList<Unit> Units { get; set; } = new List<Unit>();
+
 
         public IList<UserUnit> MyUnits { get; set; } = new List<UserUnit>();
+ 
 
-        public void AddUnit(int unitId)
+        public async Task AddUnit(int unitId)
         {
             var unit = Units.First(unit => unit.Id == unitId);
+            var result = await _http.PostAsJsonAsync<int>("api/userunit", unitId);
+            if(result.StatusCode != System.Net.HttpStatusCode.OK)
+            {
+                _toastService.ShowError(await result.Content.ReadAsStringAsync());
+            }
+            else
+            {
+                await _bananaService.GetBananas();
+                _toastService.ShowInfo($"Your {unit.Title} has beeen built!", "Unit build!"); 
+            }
+
             MyUnits.Add(new UserUnit { UnitId = unit.Id, HitPoints = unit.HitPoints });
-            _toastService.ShowSuccess($"Your {unit.Title} has been buildt!");
+            
 
             //Console.WriteLine($"{unit.Title} was build!");
             //Console.WriteLine($"Your army size: {MyUnits.Count}");
+        }
+
+        public async Task LoadUnitsAsync()
+        {
+            if(Units.Count == 0)
+            {
+                Units = await _http.GetFromJsonAsync<IList<Unit>>("api/Unit");
+            }
+        }
+
+        public async Task LoadUserUnitAsync()
+        {
+            MyUnits = await _http.GetFromJsonAsync<IList<UserUnit>>("api/userunit");
+        }
+
+        public async Task ReviveArmy()
+        {
+            var result = await _http.PostAsJsonAsync<string>("api/userunit/revive", null);
+            if(result.StatusCode == System.Net.HttpStatusCode.OK)
+            {
+                _toastService.ShowSuccess(await result.Content.ReadAsStringAsync());
+            }
+            else
+            {
+                _toastService.ShowError(await result.Content.ReadAsStringAsync());
+            }
+            await LoadUserUnitAsync();
+            await _bananaService.GetBananas();
+
         }
     }
 }

@@ -2,6 +2,7 @@
 @inject IBananaService BananaService
 @inject IUnitService UnitService 
 @inject IToastService ToastService
+@attribute [Authorize]
 
 <h3>Build</h3>
 
@@ -27,19 +28,14 @@
     bool needMoreBananas = false;
     int selectedUnitId = 1;
 
-    public void BuildUnit()
+    protected override async Task OnInitializedAsync()
     {
+        await UnitService.LoadUnitsAsync();
+    }
 
-        var selectedUnit = UnitService.Units.FirstOrDefault(unit => unit.Id == selectedUnitId);
-
-        if (BananaService.Bananas < selectedUnit.BanaCost)
-        {
-            needMoreBananas = true;
-            ToastService.ShowError("Not enough bananas!", ":-(");
-            return;
-        }
-
-        BananaService.EatBananas(selectedUnit.BanaCost);
-        UnitService.AddUnit(selectedUnitId);
+    public async void BuildUnit()
+    {
+           
+        await UnitService.AddUnit(selectedUnitId);
     }
 }

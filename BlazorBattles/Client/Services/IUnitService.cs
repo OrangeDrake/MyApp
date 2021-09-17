@@ -1,4 +1,4 @@
-﻿using BlazorBattles.Client.Shared;
+﻿using BlazorBattles.Shared;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -8,9 +8,14 @@ namespace BlazorBattles.Client.Services
 {
     interface IUnitService
     {
-        IList<Unit> Units{ get;}
+        IList<Unit> Units{ get; set; }
         IList<UserUnit> MyUnits { get; set; }
-        void AddUnit(int unitId);
+        Task AddUnit(int unitId);
 
+        Task LoadUnitsAsync();
+
+        Task LoadUserUnitAsync();
+
+        Task ReviveArmy();
     }
 }

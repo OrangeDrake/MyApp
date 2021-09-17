@@ -1,14 +1,15 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 using System.Threading.Tasks;
 
-namespace BlazorBattles.Client.Shared
+namespace BlazorBattles.Shared
 {
-    public class UserUnit
+    public class UserUnitResponse
     {
-        public int UserId { get; set; }
         public int UnitId { get; set; }
         public int HitPoints { get; set; }
+
     }
 }

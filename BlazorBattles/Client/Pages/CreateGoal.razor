@@ -1,0 +1,117 @@
+﻿@page "/creategoal"
+@attribute [Authorize]
+
+<h3>CreateGoal</h3>
+<br />
+
+
+<EditForm EditContext="@editContext" OnValidSubmit="CreateCalendar" >
+    <div class="form-group">
+        <label for="startDate">Start Date</label>
+        <InputDate id="startDate" @bind-Value="totalGoal.startDate" class="form-control"></InputDate>
+
+    </div>
+
+    <div class="form-group">
+        <label for="duration">Duration</label>
+        <InputNumber id="duration" @bind-Value="totalGoal.duration" class="form-control"></InputNumber>
+    </div>
+
+    <div class="form-group">
+        <label for="endDate">End Date</label>
+        <InputDate id="endDate" @bind-Value="totalGoal.endDate" class="form-control"></InputDate>
+
+    </div>
+
+    <button type="submit" class="btn btn-primary">Generate plan preview</button>
+
+    </EditForm>
+
+    <br />
+
+    <EditForm Model="select" OnValidSubmit="HandleCreateGoal">
+
+        <div class="form-group">
+            <label for="days">Days</label><br />
+            <InputRadioGroup id="days" @bind-Value="select" class="form-control">
+                <InputRadio Value="0" /><span style="padding-left:5px;"> All days</span>
+                <InputRadio Value="1" /><span style="padding-left:5px;"> Working Days</span>
+                <InputRadio Value="2" /><span style="padding-left:5px;"> Custum</span>
+            </InputRadioGroup>
+        </div>
+
+        <div class="form-group">
+            <label for="select">Duration</label>
+            <InputNumber id="select" @bind-Value="select" class="form-control"></InputNumber>
+        </div>
+
+    </EditForm>
+
+
+
+
+
+    @code {
+
+        TotalGoal totalGoal = new TotalGoal();
+        int select = 0;
+
+        private EditContext editContext;
+        private EditContext editContextDays;
+
+
+
+        protected override void OnInitialized()
+        {
+            editContext = new EditContext(totalGoal);
+            editContextDays = new EditContext(select);
+
+
+            editContext.OnFieldChanged += EditContext_OnFieldChanged;
+            editContextDays.OnFieldChanged += EditContextDays_OnFieldChanged;
+
+            base.OnInitialized();
+        }
+
+        private void EditContext_OnFieldChanged(object sender, FieldChangedEventArgs e)
+        {
+            if (e.FieldIdentifier.FieldName == "startDate")
+            {
+                totalGoal.endDate = totalGoal.startDate.AddDays(totalGoal.duration);
+            }
+
+            else if (e.FieldIdentifier.FieldName == "duration")
+            {
+                totalGoal.endDate = totalGoal.startDate.AddDays(totalGoal.duration);
+            }
+
+            else if (e.FieldIdentifier.FieldName == "endDate")
+            {
+                totalGoal.duration = (totalGoal.endDate - totalGoal.startDate).Days;
+            }
+        }
+
+        private void EditContextDays_OnFieldChanged(object sender, FieldChangedEventArgs e)
+        {
+
+
+        }
+
+
+        private void CreateCalendar()
+        {
+            var day =(int)totalGoal.startDate.DayOfWeek;
+
+            Console.WriteLine("Calendar Created. First day in week " + day);
+
+        }
+
+
+
+
+        void HandleCreateGoal()
+        {
+            Console.WriteLine("Created");
+
+        }
+    }
