@@ -5,113 +5,190 @@
 <br />
 
 
-<EditForm EditContext="@editContext" OnValidSubmit="CreateCalendar" >
+<EditForm EditContext="@editContext" OnValidSubmit="CreateCalendar">
     <div class="form-group">
         <label for="startDate">Start Date</label>
-        <InputDate id="startDate" @bind-Value="totalGoal.startDate" class="form-control"></InputDate>
+        <InputDate id="startDate" @bind-Value="totalGoalBuilder.startDate" class="form-control"></InputDate>
 
     </div>
 
     <div class="form-group">
         <label for="duration">Duration</label>
-        <InputNumber id="duration" @bind-Value="totalGoal.duration" class="form-control"></InputNumber>
+        <InputNumber id="duration" @bind-Value="totalGoalBuilder.duration" class="form-control"></InputNumber>
     </div>
 
     <div class="form-group">
         <label for="endDate">End Date</label>
-        <InputDate id="endDate" @bind-Value="totalGoal.endDate" class="form-control"></InputDate>
+        <InputDate id="endDate" @bind-Value="totalGoalBuilder.endDate" class="form-control"></InputDate>
 
     </div>
 
-    <button type="submit" class="btn btn-primary">Generate plan preview</button>
+    <div class="form-group">
+        <label for="week">Days</label><br />
+        <InputRadioGroup id="week" @bind-Value="totalGoalBuilder.calendarValue" class="form-control">
+            <InputRadio Value="0" /><span style="padding-left:5px;"> All days</span>
+            <InputRadio Value="1" /><span style="padding-left:5px;"> Working Days</span>
+            <InputRadio Value="2" /><span style="padding-left:5px;"> Custum</span>
+        </InputRadioGroup>
+    </div>
 
-    </EditForm>
+    <div class="form-group">
+        <label for="monday">
+            Monday
+            <InputCheckbox disabled="@daysAreDisabled" id="monday" @bind-Value=totalGoalBuilder.monday class="form-check"></InputCheckbox>
+        </label>
+        <label for="tuesday">
+            Tuesday
+            <InputCheckbox disabled="@daysAreDisabled" id="tuesday" @bind-Value=totalGoalBuilder.tuesday class="form-check"></InputCheckbox>
+        </label>
+        <label for="wednesday">
+            Wednesday
+            <InputCheckbox disabled="@daysAreDisabled" id="wednesday" @bind-Value=totalGoalBuilder.wednesday class="form-check"></InputCheckbox>
+        </label>
+        <label for="thursday">
+            Thursday
+            <InputCheckbox disabled="@daysAreDisabled" id="thursday" @bind-Value=totalGoalBuilder.thursday class="form-check"></InputCheckbox>
+        </label>
+        <label for="friday">
+            Friday
+            <InputCheckbox disabled="@daysAreDisabled" id="friday" @bind-Value=totalGoalBuilder.friday class="form-check"></InputCheckbox>
+        </label>
+        <label for="saturday">
+            Saturday
+            <InputCheckbox disabled="@daysAreDisabled" id="saturday" @bind-Value=totalGoalBuilder.saturday class="form-check"></InputCheckbox>
+        </label>
+        <label for="sunday">
+            Sunday
+            <InputCheckbox disabled="@daysAreDisabled" id="sunday" @bind-Value=totalGoalBuilder.sunday class="form-check"></InputCheckbox>
+        </label>
+    </div>
+
 
     <br />
+    <button type="submit" class="btn btn-primary">Generate plan preview</button>
 
-    <EditForm Model="select" OnValidSubmit="HandleCreateGoal">
+</EditForm>
 
-        <div class="form-group">
-            <label for="days">Days</label><br />
-            <InputRadioGroup id="days" @bind-Value="select" class="form-control">
-                <InputRadio Value="0" /><span style="padding-left:5px;"> All days</span>
-                <InputRadio Value="1" /><span style="padding-left:5px;"> Working Days</span>
-                <InputRadio Value="2" /><span style="padding-left:5px;"> Custum</span>
-            </InputRadioGroup>
-        </div>
+<br />
 
-        <div class="form-group">
-            <label for="select">Duration</label>
-            <InputNumber id="select" @bind-Value="select" class="form-control"></InputNumber>
-        </div>
+@if (isCalendarVissible)
+{
+    <h3> Calendar</h3>
 
-    </EditForm>
-
-
-
-
-
-    @code {
-
-        TotalGoal totalGoal = new TotalGoal();
-        int select = 0;
-
-        private EditContext editContext;
-        private EditContext editContextDays;
-
-
-
-        protected override void OnInitialized()
+    <table class="table">
+        @while (currentCalendarDay < totalGoalBuilder.endDate)
         {
-            editContext = new EditContext(totalGoal);
-            editContextDays = new EditContext(select);
+            @if (lastPrintedMonth != currentCalendarDay.Month)
+            {
+                <tr>@currentCalendarDay.ToString("MMMM")</tr>
+                lastPrintedMonth = currentCalendarDay.Month;
+            }
+            <tr>
+                @for (int j = 0; j < 7; j++)
+
+                {
+                    currentCalendarDay = currentCalendarDay.AddDays(1);
+                    <td> @currentCalendarDay.ToString("dd")</td>
+                }
+            </tr>
+        }
+    </table>
+}
 
 
-            editContext.OnFieldChanged += EditContext_OnFieldChanged;
-            editContextDays.OnFieldChanged += EditContextDays_OnFieldChanged;
 
-            base.OnInitialized();
+@code {
+
+    public DateTime currentCalendarDay { get; set; }
+
+
+    private int lastPrintedMonth = -1;
+    private bool isCalendarVissible = false;
+
+    private bool daysAreDisabled { get; set; } = true;
+
+    TotalGoalBuilder totalGoalBuilder = new TotalGoalBuilder();
+
+
+    private EditContext editContext;
+
+    protected override void OnInitialized()
+    {
+        editContext = new EditContext(totalGoalBuilder);
+
+        editContext.OnFieldChanged += EditContext_OnFieldChanged;
+
+        base.OnInitialized();
+    }
+
+    private void EditContext_OnFieldChanged(object sender, FieldChangedEventArgs e)
+    {
+        if (e.FieldIdentifier.FieldName == "startDate")
+        {
+            totalGoalBuilder.endDate = totalGoalBuilder.startDate.AddDays(totalGoalBuilder.duration);
         }
 
-        private void EditContext_OnFieldChanged(object sender, FieldChangedEventArgs e)
+        else if (e.FieldIdentifier.FieldName == "duration")
         {
-            if (e.FieldIdentifier.FieldName == "startDate")
+            totalGoalBuilder.endDate = totalGoalBuilder.startDate.AddDays(totalGoalBuilder.duration);
+        }
+
+        else if (e.FieldIdentifier.FieldName == "endDate")
+        {
+            totalGoalBuilder.duration = (totalGoalBuilder.endDate - totalGoalBuilder.startDate).Days;
+        }
+        else if (e.FieldIdentifier.FieldName == "calendarValue")
+        {
+            if (totalGoalBuilder.calendarValue == 0)
             {
-                totalGoal.endDate = totalGoal.startDate.AddDays(totalGoal.duration);
+
+                daysAreDisabled = true;
+
+                totalGoalBuilder.monday = true;
+                totalGoalBuilder.tuesday = true;
+                totalGoalBuilder.wednesday = true;
+                totalGoalBuilder.thursday = true;
+                totalGoalBuilder.friday = true;
+                totalGoalBuilder.saturday = true;
+                totalGoalBuilder.sunday = true;
             }
 
-            else if (e.FieldIdentifier.FieldName == "duration")
+            else if (totalGoalBuilder.calendarValue == 1)
             {
-                totalGoal.endDate = totalGoal.startDate.AddDays(totalGoal.duration);
-            }
 
-            else if (e.FieldIdentifier.FieldName == "endDate")
+                daysAreDisabled = true;
+
+                totalGoalBuilder.monday = true;
+                totalGoalBuilder.tuesday = true;
+                totalGoalBuilder.wednesday = true;
+                totalGoalBuilder.thursday = true;
+                totalGoalBuilder.friday = true;
+                totalGoalBuilder.saturday = false;
+                totalGoalBuilder.sunday = false;
+            }
+            else
             {
-                totalGoal.duration = (totalGoal.endDate - totalGoal.startDate).Days;
+                daysAreDisabled = false;
             }
-        }
-
-        private void EditContextDays_OnFieldChanged(object sender, FieldChangedEventArgs e)
-        {
-
-
-        }
-
-
-        private void CreateCalendar()
-        {
-            var day =(int)totalGoal.startDate.DayOfWeek;
-
-            Console.WriteLine("Calendar Created. First day in week " + day);
-
-        }
-
-
-
-
-        void HandleCreateGoal()
-        {
-            Console.WriteLine("Created");
-
         }
     }
+
+
+    private void CreateCalendar()
+    {
+        lastPrintedMonth = -1;
+        isCalendarVissible = true;
+        var startDayNumber = (int)totalGoalBuilder.startDate.DayOfWeek;
+        startDayNumber = startDayNumber == 0 ? 7 : startDayNumber;
+        Console.WriteLine("Start dayrt numbet " + startDayNumber);
+
+        currentCalendarDay = totalGoalBuilder.startDate.AddDays(-startDayNumber + 1);
+
+        Console.WriteLine("Calendar Created. First day in week " + currentCalendarDay);
+
+    }
+}
+
+
+
+
