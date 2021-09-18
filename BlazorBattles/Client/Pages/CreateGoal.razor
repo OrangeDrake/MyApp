@@ -9,7 +9,6 @@
     <div class="form-group">
         <label for="startDate">Start Date</label>
         <InputDate id="startDate" @bind-Value="totalGoalBuilder.startDate" class="form-control"></InputDate>
-
     </div>
 
     <div class="form-group">
@@ -35,31 +34,31 @@
     <div class="form-group">
         <label for="monday">
             Monday
-            <InputCheckbox disabled="@daysAreDisabled" id="monday" @bind-Value=totalGoalBuilder.monday class="form-check"></InputCheckbox>
+            <InputCheckbox disabled="@daysAreDisabled" id="monday" @bind-Value=totalGoalBuilder.Monday class="form-check"></InputCheckbox>
         </label>
         <label for="tuesday">
             Tuesday
-            <InputCheckbox disabled="@daysAreDisabled" id="tuesday" @bind-Value=totalGoalBuilder.tuesday class="form-check"></InputCheckbox>
+            <InputCheckbox disabled="@daysAreDisabled" id="tuesday" @bind-Value=totalGoalBuilder.Tuesday class="form-check"></InputCheckbox>
         </label>
         <label for="wednesday">
             Wednesday
-            <InputCheckbox disabled="@daysAreDisabled" id="wednesday" @bind-Value=totalGoalBuilder.wednesday class="form-check"></InputCheckbox>
+            <InputCheckbox disabled="@daysAreDisabled" id="wednesday" @bind-Value=totalGoalBuilder.Wednesday class="form-check"></InputCheckbox>
         </label>
         <label for="thursday">
             Thursday
-            <InputCheckbox disabled="@daysAreDisabled" id="thursday" @bind-Value=totalGoalBuilder.thursday class="form-check"></InputCheckbox>
+            <InputCheckbox disabled="@daysAreDisabled" id="thursday" @bind-Value=totalGoalBuilder.Thursday class="form-check"></InputCheckbox>
         </label>
         <label for="friday">
             Friday
-            <InputCheckbox disabled="@daysAreDisabled" id="friday" @bind-Value=totalGoalBuilder.friday class="form-check"></InputCheckbox>
+            <InputCheckbox disabled="@daysAreDisabled" id="friday" @bind-Value=totalGoalBuilder.Friday class="form-check"></InputCheckbox>
         </label>
         <label for="saturday">
             Saturday
-            <InputCheckbox disabled="@daysAreDisabled" id="saturday" @bind-Value=totalGoalBuilder.saturday class="form-check"></InputCheckbox>
+            <InputCheckbox disabled="@daysAreDisabled" id="saturday" @bind-Value=totalGoalBuilder.Saturday class="form-check"></InputCheckbox>
         </label>
         <label for="sunday">
             Sunday
-            <InputCheckbox disabled="@daysAreDisabled" id="sunday" @bind-Value=totalGoalBuilder.sunday class="form-check"></InputCheckbox>
+            <InputCheckbox disabled="@daysAreDisabled" id="sunday" @bind-Value=totalGoalBuilder.Sunday class="form-check"></InputCheckbox>
         </label>
     </div>
 
@@ -76,22 +75,43 @@
     <h3> Calendar</h3>
 
     <table class="table">
-        @while (currentCalendarDay < totalGoalBuilder.endDate)
-        {
-            @if (lastPrintedMonth != currentCalendarDay.Month)
-            {
-                <tr>@currentCalendarDay.ToString("MMMM")</tr>
-                lastPrintedMonth = currentCalendarDay.Month;
-            }
+        <thead>
             <tr>
-                @for (int j = 0; j < 7; j++)
-
-                {
-                    currentCalendarDay = currentCalendarDay.AddDays(1);
-                    <td> @currentCalendarDay.ToString("dd")</td>
-                }
+                <th>Monday</th>
+                <th>TuesDay</th>
+                <th>Wednesday</th>
+                <th>Thursday</th>
+                <th>Friday</th>
+                <th>Saturday</th>
+                <th>Sunday</th>
             </tr>
-        }
+        </thead>
+        <tbody>
+            @while (currentCalendarDay < totalGoalBuilder.endDate)
+            {
+                @if (lastPrintedMonth != currentCalendarDay.Month)
+                {
+                    <tr>
+                        <td colspan="7"><h3>@currentCalendarDay.ToString("MMMM yyyy")</h3></td>
+                    </tr>
+                    lastPrintedMonth = currentCalendarDay.Month;
+                }
+                <tr>
+                    @for (int j = 0; j < 7; j++)
+                    {
+                        @if (currentCalendarDay < totalGoalBuilder.startDate || currentCalendarDay > totalGoalBuilder.endDate)
+                        {
+                            <td style="color: grey; font-weight: 200;"> @currentCalendarDay.ToString("dd")</td>
+                        }
+                        else
+                        {
+                            <td style="@GetStyle(currentCalendarDay)"> @currentCalendarDay.ToString("dd")</td>                            
+                        }
+                        currentCalendarDay = currentCalendarDay.AddDays(1);
+                    }
+                </tr>
+            }
+        </tbody>
     </table>
 }
 
@@ -123,6 +143,7 @@
 
     private void EditContext_OnFieldChanged(object sender, FieldChangedEventArgs e)
     {
+        isCalendarVissible = false;
         if (e.FieldIdentifier.FieldName == "startDate")
         {
             totalGoalBuilder.endDate = totalGoalBuilder.startDate.AddDays(totalGoalBuilder.duration);
@@ -144,13 +165,13 @@
 
                 daysAreDisabled = true;
 
-                totalGoalBuilder.monday = true;
-                totalGoalBuilder.tuesday = true;
-                totalGoalBuilder.wednesday = true;
-                totalGoalBuilder.thursday = true;
-                totalGoalBuilder.friday = true;
-                totalGoalBuilder.saturday = true;
-                totalGoalBuilder.sunday = true;
+                totalGoalBuilder.Monday = true;
+                totalGoalBuilder.Tuesday = true;
+                totalGoalBuilder.Wednesday = true;
+                totalGoalBuilder.Thursday = true;
+                totalGoalBuilder.Friday = true;
+                totalGoalBuilder.Saturday = true;
+                totalGoalBuilder.Sunday = true;
             }
 
             else if (totalGoalBuilder.calendarValue == 1)
@@ -158,13 +179,13 @@
 
                 daysAreDisabled = true;
 
-                totalGoalBuilder.monday = true;
-                totalGoalBuilder.tuesday = true;
-                totalGoalBuilder.wednesday = true;
-                totalGoalBuilder.thursday = true;
-                totalGoalBuilder.friday = true;
-                totalGoalBuilder.saturday = false;
-                totalGoalBuilder.sunday = false;
+                totalGoalBuilder.Monday = true;
+                totalGoalBuilder.Tuesday = true;
+                totalGoalBuilder.Wednesday = true;
+                totalGoalBuilder.Thursday = true;
+                totalGoalBuilder.Friday = true;
+                totalGoalBuilder.Saturday = false;
+                totalGoalBuilder.Sunday = false;
             }
             else
             {
@@ -181,14 +202,24 @@
         var startDayNumber = (int)totalGoalBuilder.startDate.DayOfWeek;
         startDayNumber = startDayNumber == 0 ? 7 : startDayNumber;
         Console.WriteLine("Start dayrt numbet " + startDayNumber);
-
         currentCalendarDay = totalGoalBuilder.startDate.AddDays(-startDayNumber + 1);
-
         Console.WriteLine("Calendar Created. First day in week " + currentCalendarDay);
+    }
+
+
+    private string GetStyle(DateTime currentCalendarDay)
+    {
+        PropertyInfo pinfo = typeof(TotalGoalBuilder).GetProperty(currentCalendarDay.DayOfWeek.ToString());
+        Console.WriteLine(currentCalendarDay.DayOfWeek.ToString());
+        Console.WriteLine("PInfo: " + pinfo);
+
+        if ((bool)pinfo.GetValue(totalGoalBuilder, null))
+        {
+            return "color: green; font-weight: 600;";
+        }
+        return "font-weight: 400;";
 
     }
 }
-
-
 
 
