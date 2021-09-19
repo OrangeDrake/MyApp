@@ -1,7 +1,7 @@
 ﻿@page "/creategoal"
 @attribute [Authorize]
 
-<h3>CreateGoal108</h3>
+<h3>CreateGoal111</h3>
 <br />
 
 
@@ -63,8 +63,13 @@
     </div>
 
 
-    <br />
-    <button type="submit" class="btn btn-primary">Generate plan preview</button>
+    
+    <button style ="margin: 8px"  type="submit" class="btn btn-primary">Generate plan preview</button>
+    
+    @if (isLoadPreviousButtonVissible)
+    {
+        <button style ="margin: 8px" type="button" class="btn btn-secondary"  @onclick="() => LoadPreviousPlan()" >Load previous plan preview</button>
+    }
 
 </EditForm>
 
@@ -72,9 +77,12 @@
 
 @if (isCalendarVissible)
 {
+    currentCalendarDay = firstCalendarDay;
+    dayIndex = 0;
+
     <h3> Calendar</h3>
 
-    <table class="table"  >
+    <table class="table">
         <thead>
             <tr>
                 <th width="14%">Monday</th>
@@ -87,7 +95,7 @@
             </tr>
         </thead>
         <tbody>
-            @while (currentCalendarDay < totalGoalBuilder.endDate)
+            @while (currentCalendarDay <= endCalendarDay)
             {
                 @if (lastPrintedMonth != currentCalendarDay.Month)
                 {
@@ -99,15 +107,13 @@
                 <tr>
                     @for (int j = 0; j < 7; j++)
                     {
-                        @if (currentCalendarDay < totalGoalBuilder.startDate || currentCalendarDay > totalGoalBuilder.endDate)
+                        @if (currentCalendarDay < startCalendarDay || currentCalendarDay > endCalendarDay)
                         {
                             <td style="color: grey; font-weight: 200;"> @currentCalendarDay.ToString("dd")</td>
                         }
                         else
                         {
-
-                <td style="@SaveDateAndGetStyle(currentCalendarDay)" @onclick="() => TestFunction()"> @currentCalendarDay.ToString("dd") </td>
-
+                            <td style="@GetStyle(currentCalendarDay)" @onclick="() => TestFunction()"> @currentCalendarDay.ToString("dd") </td>
                         }
                         currentCalendarDay = currentCalendarDay.AddDays(1);
                     }
@@ -116,24 +122,34 @@
             }
         </tbody>
     </table>
-    @(currentCalendarDay = firstCalendarDay;)
+
+
 }
 
 
 
 @code {
 
-    private Goal goal { get; set; }
+    private Goal goal { get; set; } = null;
+    private Goal previousGoal { get; set; } = null;
 
     private DateTime firstCalendarDay { get; set; }
+    private DateTime startCalendarDay { get; set; }
+    private DateTime endCalendarDay { get; set; }
+
     private DateTime currentCalendarDay { get; set; }
 
     private int lastPrintedMonth = -1;
     private bool isCalendarVissible = false;
+    private bool isLoadPreviousButtonVissible = false;
+
+
 
     private bool daysAreDisabled { get; set; } = true;
 
     GoalBuilder totalGoalBuilder = new GoalBuilder();
+
+    int dayIndex = 0;
 
 
     private EditContext editContext;
@@ -149,7 +165,7 @@
 
     private void EditContext_OnFieldChanged(object sender, FieldChangedEventArgs e)
     {
-        isCalendarVissible = false;
+
         if (e.FieldIdentifier.FieldName == "startDate")
         {
             totalGoalBuilder.endDate = totalGoalBuilder.startDate.AddDays(totalGoalBuilder.duration);
@@ -204,6 +220,16 @@
     private void CreateCalendar()
     {
 
+
+        previousGoal = goal;
+
+
+        if (previousGoal != null)
+        {
+            isLoadPreviousButtonVissible = true;
+        }
+
+
         goal = new Goal();
         goal.Name = "Some name";
 
@@ -211,40 +237,67 @@
         var startDayNumber = (int)totalGoalBuilder.startDate.DayOfWeek;
         startDayNumber = startDayNumber == 0 ? 7 : startDayNumber;
         Console.WriteLine("Start dayrt numbet " + startDayNumber);
+
         firstCalendarDay = totalGoalBuilder.startDate.AddDays(-startDayNumber + 1);
-        currentCalendarDay = firstCalendarDay;
+        startCalendarDay = totalGoalBuilder.startDate;
+        endCalendarDay = totalGoalBuilder.endDate;
+
+        currentCalendarDay = totalGoalBuilder.startDate;
 
         Console.WriteLine("Calendar Created. First day in week " + currentCalendarDay);
+
+        while (currentCalendarDay <= totalGoalBuilder.endDate)
+        {
+            PropertyInfo pinfo = typeof(GoalBuilder).GetProperty(currentCalendarDay.DayOfWeek.ToString());
+            if ((bool)pinfo.GetValue(totalGoalBuilder, null))
+            {
+                goal.Days.Add(new GoalDay { StartTime = currentCalendarDay });
+            }
+            currentCalendarDay = currentCalendarDay.AddDays(1);
+            Console.WriteLine("in while");
+        }
 
         isCalendarVissible = true;
 
     }
 
 
-    private string SaveDateAndGetStyle(DateTime currentCalendarDay)
+    private string GetStyle(DateTime currentCalendarDay)
     {
-        PropertyInfo pinfo = typeof(GoalBuilder).GetProperty(currentCalendarDay.DayOfWeek.ToString());
-        //Console.WriteLine(currentCalendarDay.DayOfWeek.ToString());
-        //Console.WriteLine("PInfo: " + pinfo);
-
-        if ((bool)pinfo.GetValue(totalGoalBuilder, null))
+        if (dayIndex == goal.Days.Count)
         {
-            goal.Days.Add(new GoalDay
-            {
-                StartTime = currentCalendarDay,
-
-            }
-            ); ;
-
-            return "border: 1px solid black; background-color: PaleGreen; font-weight: 600;";
+            return "border: 2px dashed black; font-weight: 400;cursor: pointer;";
         }
-        return "font-weight: 400;";
+
+        GoalDay currentGoalDay = goal.Days.ElementAt(dayIndex);
+
+        if (currentGoalDay.StartTime == currentCalendarDay)
+        {
+            dayIndex++;
+            return "border: 2px solid black; background-color: PaleGreen; font-weight: 600; cursor: pointer;";
+        }
+        return "border: 2px dashed black; font-weight: 400;cursor: pointer;";
 
     }
 
     private void TestFunction()
     {
         Console.WriteLine("kliknuto");
+    }
+
+
+    private void LoadPreviousPlan()
+    {
+        goal = previousGoal;
+
+        startCalendarDay = goal.Days.ElementAt(0).StartTime;
+
+        var startDayNumber = (int)startCalendarDay.DayOfWeek;
+        startDayNumber = startDayNumber == 0 ? 7 : startDayNumber;
+
+
+        firstCalendarDay = startCalendarDay.AddDays(-startDayNumber + 1);
+        endCalendarDay = goal.Days.ElementAt(goal.Days.Count - 1).StartTime;
     }
 
 }
