@@ -5,7 +5,7 @@
 <br />
 
 
-<EditForm EditContext="@editContext" OnValidSubmit="CreateCalendar">
+<EditForm EditContext="@editContext" OnValidSubmit="CreateCurrentGoal" style="max-width : 600px">
     <div class="form-group">
         <label for="startDate">Start Date</label>
         <InputDate id="startDate" @bind-Value="totalGoalBuilder.startDate" class="form-control"></InputDate>
@@ -63,15 +63,20 @@
     </div>
 
 
-    
-    <button style ="margin: 8px"  type="submit" class="btn btn-primary">Generate plan preview</button>
-    
+
+    <button style="margin: 8px" type="submit" class="btn btn-primary">Generate plan preview</button>
+
     @if (isLoadPreviousButtonVissible)
     {
-        <button style ="margin: 8px" type="button" class="btn btn-secondary"  @onclick="() => LoadPreviousPlan()" >Load previous plan preview</button>
+        <button style="margin: 8px" type="button" class="btn btn-secondary" @onclick="() => LoadPreviousPlan()">Load previous plan preview</button>
     }
 
 </EditForm>
+
+
+<Modal @ref="Modal" editGoalDay ="modalGoalDay" ></Modal>
+
+
 
 <br />
 
@@ -82,7 +87,7 @@
 
     <h3> Calendar</h3>
 
-    <table class="table">
+    <table class="table" style="max-width : 1000px">
         <thead>
             <tr>
                 <th width="14%">Monday</th>
@@ -113,12 +118,12 @@
                         }
                         else
                         {
-                            <td style="@GetStyle(currentCalendarDay)" @onclick="() => TestFunction()"> @currentCalendarDay.ToString("dd") </td>
+                            DateTime cellCalendarDay = currentCalendarDay;
+                            <td style="@GetStyle(currentCalendarDay)" @onclick="() =>CellClicked(cellCalendarDay)"> @currentCalendarDay.ToString("dd") </td>
                         }
                         currentCalendarDay = currentCalendarDay.AddDays(1);
                     }
-                </tr>
-                Console.WriteLine(goal);
+                </tr>                
             }
         </tbody>
     </table>
@@ -129,6 +134,17 @@
 
 
 @code {
+
+    private void CellClicked(DateTime currentDay)
+    {
+
+        modalGoalDay = goal.Days.First(goalDay => goalDay.StartTime.Equals(currentDay));
+
+        Modal.Open();
+    }
+
+    private Modal Modal { get; set; }
+    private GoalDay modalGoalDay { get; set; } = new GoalDay();
 
     private Goal goal { get; set; } = null;
     private Goal previousGoal { get; set; } = null;
@@ -217,7 +233,7 @@
     }
 
 
-    private void CreateCalendar()
+    private void CreateCurrentGoal()
     {
 
 
@@ -233,13 +249,15 @@
         goal = new Goal();
         goal.Name = "Some name";
 
+
+        startCalendarDay = totalGoalBuilder.startDate;
+
         lastPrintedMonth = -1;
-        var startDayNumber = (int)totalGoalBuilder.startDate.DayOfWeek;
+        var startDayNumber = (int)startCalendarDay.DayOfWeek;
         startDayNumber = startDayNumber == 0 ? 7 : startDayNumber;
         Console.WriteLine("Start dayrt numbet " + startDayNumber);
 
-        firstCalendarDay = totalGoalBuilder.startDate.AddDays(-startDayNumber + 1);
-        startCalendarDay = totalGoalBuilder.startDate;
+        firstCalendarDay = startCalendarDay.AddDays(-startDayNumber + 1);
         endCalendarDay = totalGoalBuilder.endDate;
 
         currentCalendarDay = totalGoalBuilder.startDate;
@@ -253,8 +271,7 @@
             {
                 goal.Days.Add(new GoalDay { StartTime = currentCalendarDay });
             }
-            currentCalendarDay = currentCalendarDay.AddDays(1);
-            Console.WriteLine("in while");
+            currentCalendarDay = currentCalendarDay.AddDays(1);            
         }
 
         isCalendarVissible = true;
@@ -270,6 +287,7 @@
         }
 
         GoalDay currentGoalDay = goal.Days.ElementAt(dayIndex);
+        Console.WriteLine("note:" + currentGoalDay.Note);
 
         if (currentGoalDay.StartTime == currentCalendarDay)
         {
@@ -278,11 +296,6 @@
         }
         return "border: 2px dashed black; font-weight: 400;cursor: pointer;";
 
-    }
-
-    private void TestFunction()
-    {
-        Console.WriteLine("kliknuto");
     }
 
 
