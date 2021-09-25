@@ -11,5 +11,7 @@ namespace BlazorBattles.Shared
         public String Name { get; set; }
         public List<GoalDay> Days { get; } = new List<GoalDay>();
 
+        public TimeSpan Time { get; set; }
+
     }
 }

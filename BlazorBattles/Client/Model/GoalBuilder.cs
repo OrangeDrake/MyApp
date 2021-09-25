@@ -1,17 +1,14 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace BlazorBattles.Client.Model
 {
     public class GoalBuilder
     {
-        public DateTime startDate { get; set; } = DateTime.Today;
-        public int duration { get; set; } = 30;
-        public DateTime endDate { get; set; } = DateTime.Now.AddDays(30);
-        public int calendarValue { get; set; } = 0;
+        public string Name { get; set; } 
+        public DateTime StartDate { get; set; } = DateTime.Today;
+        public int Duration { get; set; } = 30;
+        public DateTime EndDate { get; set; } = DateTime.Now.AddDays(30);
+        public int CalendarValue { get; set; } = 0;
         public bool Monday { get; set; } = true;
         public bool Tuesday { get; set; } = true;
         public bool Wednesday { get; set; } = true;
@@ -19,6 +16,10 @@ namespace BlazorBattles.Client.Model
         public bool Friday { get; set; } = true;
         public bool Saturday { get; set; } = true;
         public bool Sunday { get; set; } = true;
-        
+
+        public bool IsWholeDay { get; set; } = true;
+        public string Time { get; set; }
+        public string Length { get; set; }
+
     }
 }

@@ -2,28 +2,29 @@
     <div class="modal-dialog" role="document">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title">@(editGoalDay.StartTime)</h5>
+                <h5 class="modal-title">@(editGoalDay.StartTime.ToShortDateString())</h5>
                 <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                     <span aria-hidden="true">&times;</span>
                 </button>
             </div>
             <div class="modal-body">
                 <p>Modal body text goes here.</p>
-                <EditForm Model="editGoalDay">
+                <EditForm Model="tempGoalDay">
                     <div class="form-group">
                         <label for="note">Bio</label>
-                        <InputTextArea id="note" @bind-Value="editGoalDay.Note" class="form-control"></InputTextArea>
+                        <InputTextArea id="note" @bind-Value="tempGoalDay.Note" class="form-control"></InputTextArea>
 
                     </div>
                 </EditForm>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-primary">Save changes</button>
+                <button type="button" class="btn btn-primary" @onclick="() => Save()">Save changes</button>
                 <button type="button" class="btn btn-secondary" data-dismiss="modal" @onclick="() => Close()">Close</button>
             </div>
         </div>
     </div>
 </div>
+
 
 
 @if (ShowBackdrop)
@@ -36,25 +37,62 @@
 
     [Parameter]
     public GoalDay editGoalDay { get; set; }
+    public GoalDay tempGoalDay { get; set; }
 
     public Guid Guid = Guid.NewGuid();
     public string ModalDisplay = "none;";
     public string ModalClass = "";
     public bool ShowBackdrop = false;
 
+    public void Save()
+    {
+        if (tempGoalDay.Note != String.Empty)
+        {
+            editGoalDay.Note = (String)tempGoalDay.Note.Clone();
+        }
+    }
+
+    protected override void OnParametersSet()
+    {
+
+        base.OnParametersSet();
+
+        tempGoalDay = new GoalDay();
+
+        Console.WriteLine("1. temp goal note:" + tempGoalDay.Note);
+        Console.WriteLine("editGoalDay goal note" + editGoalDay.Note);
+
+        if (editGoalDay.Note == null)
+        {
+            tempGoalDay.Note = String.Empty;
+        }
+        else
+        {
+            tempGoalDay.Note = (String)editGoalDay.Note.Clone();
+        }
+
+        Console.WriteLine("2. temp goal note:" + tempGoalDay.Note);
+    }
+
+
+
     public void Open()
     {
+
         ModalDisplay = "block;";
         ModalClass = "Show";
         ShowBackdrop = true;
+
         StateHasChanged();
     }
+
 
     public void Close()
     {
         ModalDisplay = "none";
         ModalClass = "";
         ShowBackdrop = false;
+
         StateHasChanged();
     }
 }
