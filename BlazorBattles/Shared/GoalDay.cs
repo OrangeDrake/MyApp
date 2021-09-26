@@ -8,8 +8,9 @@ namespace BlazorBattles.Shared
 {
     public class GoalDay
     {
-        public DateTime StartTime { get; set; }
-        public ushort Duration { get; set; }
+        public bool IsAllDay { get; set; }
+        public DateTime StartDate { get; set; }
+        public TimeSpan Length { get; set; }
         public string Note { get; set; }
 
     }

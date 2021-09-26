@@ -34,7 +34,7 @@
         <br />
         @if (IsTimeVisible)
         {
-            <span>Starting Time </span><InputText type="time" @bind-Value="@totalGoalBuilder.Time" />
+            <span>Starting Time </span><InputText type="time" @bind-Value="@totalGoalBuilder.StartTime" />
             <span>Length of session </span><InputText type="time" @bind-Value="@totalGoalBuilder.Length" />
 
         }
@@ -44,9 +44,9 @@
     <div class="form-group">
         <label for="week">Days</label><br />
         <InputRadioGroup id="week" @bind-Value="totalGoalBuilder.CalendarValue" class="form-control">
-            <InputRadio Value="0" /><span style="padding-left:5px;"> All days</span>
-            <InputRadio Value="1" /><span style="padding-left:5px;"> Working Days</span>
-            <InputRadio Value="2" /><span style="padding-left:5px;"> Custom</span>
+            <InputRadio Value="0" /><span style="padding-left:5px;"> All week</span>
+            <InputRadio Value="1" /><span style="padding-left:5px;"> Working days</span>
+            <InputRadio Value="2" /><span style="padding-left:5px;"> Custom days</span>
         </InputRadioGroup>
     </div>
 
@@ -105,7 +105,7 @@
     dayIndex = 0;
 
 
-    <snan style="background-color: navajowhite;">To fullfil goal <b>@goal.Name</b> was generated <b>@goal.Days.Count</b> active days. Time: @totalGoalBuilder.Time</snan>
+    <snan style="background-color: navajowhite;">To fullfil goal <b>@goal.Name</b> was generated <b>@goal.Days.Count</b> active days. Time: @totalGoalBuilder.StartTime</snan>
 
     <br />
 
@@ -162,12 +162,12 @@
     {
         get
         {
-            return !totalGoalBuilder.IsWholeDay;
+            return !totalGoalBuilder.IsAllDay;
         }
         set
         {
-            totalGoalBuilder.IsWholeDay = !value;
-            totalGoalBuilder.Time = "00:00:00";
+            totalGoalBuilder.IsAllDay = !value;
+            totalGoalBuilder.StartTime = "00:00:00";
             totalGoalBuilder.Length = "01:00:00";
         }
     }
@@ -189,8 +189,6 @@
     private bool isCalendarVissible = false;
     private bool isLoadPreviousButtonVissible = false;
 
-
-
     private bool daysAreDisabled { get; set; } = true;
 
     GoalBuilder totalGoalBuilder = new GoalBuilder();
@@ -204,7 +202,7 @@
     private void CellClicked(DateTime currentDay)
     {
 
-        modalGoalDay = goal.Days.First(goalDay => goalDay.StartTime.ToShortDateString().Equals(currentDay.ToShortDateString()));
+        modalGoalDay = goal.Days.First(goalDay => goalDay.StartDate.ToShortDateString().Equals(currentDay.ToShortDateString()));
 
         Modal.Open();
     }
@@ -289,9 +287,6 @@
         goal = new Goal();
         goal.Name = "Some name";
 
-        TimeSpan LocalTime = TimeSpan.FromHours(0);
-        TimeSpan.TryParseExact(totalGoalBuilder.Time, "hh\\:mm\\:ss", null, out LocalTime);
-
         startCalendarDay = totalGoalBuilder.StartDate;
 
         lastPrintedMonth = -1;
@@ -303,21 +298,23 @@
 
         currentCalendarDay = totalGoalBuilder.StartDate;
 
+        TimeSpan StartTime = TimeSpan.FromHours(0);
+        TimeSpan LocalLenght;
+        TimeSpan.TryParseExact(totalGoalBuilder.StartTime, "hh\\:mm\\:ss", null, out StartTime);
+        TimeSpan.TryParseExact(totalGoalBuilder.StartTime, "hh\\:mm\\:ss", null, out LocalLenght);
 
         while (currentCalendarDay <= totalGoalBuilder.EndDate)
         {
             PropertyInfo pinfo = typeof(GoalBuilder).GetProperty(currentCalendarDay.DayOfWeek.ToString());
             if ((bool)pinfo.GetValue(totalGoalBuilder, null))
             {
-                goal.Days.Add(new GoalDay { StartTime = currentCalendarDay + LocalTime });
+                goal.Days.Add(new GoalDay { StartDate = currentCalendarDay + StartTime, Length = LocalLenght, IsAllDay = totalGoalBuilder.IsAllDay});
             }
             currentCalendarDay = currentCalendarDay.AddDays(1);
             goal.Name = (String)totalGoalBuilder.Name.Clone();
-
         }
 
         isCalendarVissible = true;
-
     }
 
 
@@ -331,7 +328,7 @@
         GoalDay currentGoalDay = goal.Days.ElementAt(dayIndex);
         //Console.WriteLine("note:" + currentGoalDay.Note);
 
-        if (currentGoalDay.StartTime.ToShortDateString() == currentCalendarDay.ToShortDateString())
+        if (currentGoalDay.StartDate.ToShortDateString() == currentCalendarDay.ToShortDateString())
         {
             dayIndex++;
             return "border: 2px solid black; background-color: PaleGreen; font-weight: 600; cursor: pointer;";
@@ -345,14 +342,14 @@
     {
         goal = previousGoal;
 
-        startCalendarDay = goal.Days.ElementAt(0).StartTime;
+        startCalendarDay = goal.Days.ElementAt(0).StartDate;
 
         var startDayNumber = (int)startCalendarDay.DayOfWeek;
         startDayNumber = startDayNumber == 0 ? 7 : startDayNumber;
 
 
         firstCalendarDay = startCalendarDay.AddDays(-startDayNumber + 1);
-        endCalendarDay = goal.Days.ElementAt(goal.Days.Count - 1).StartTime;
+        endCalendarDay = goal.Days.ElementAt(goal.Days.Count - 1).StartDate;
     }
 
 }

@@ -2,7 +2,7 @@
     <div class="modal-dialog" role="document">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title">@(editGoalDay.StartTime.ToShortDateString())</h5>
+                <h5 class="modal-title">@(tempGoalDay.StartDate)</h5>
                 <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                     <span aria-hidden="true">&times;</span>
                 </button>
@@ -10,6 +10,17 @@
             <div class="modal-body">
                 <p>Modal body text goes here.</p>
                 <EditForm Model="tempGoalDay">
+                    <div class="form-group">
+                        <label for="showTime">All Day</label>
+                        <InputCheckbox id="showTime" @bind-Value="tempGoalDay.IsAllDay" class="form-checked"></InputCheckbox>
+                        <br />
+                        @if (!tempGoalDay.IsAllDay)
+                        {
+                            <span>Starting Time </span><InputText type="time" @bind-Value="@StartDateProxy" />
+                            @*<span>Length of session </span><InputText type="time" @bind-Value="@tempGoalDay.Length" />*@
+
+                        }
+                    </div>
                     <div class="form-group">
                         <label for="note">Bio</label>
                         <InputTextArea id="note" @bind-Value="tempGoalDay.Note" class="form-control"></InputTextArea>
@@ -44,6 +55,18 @@
     public string ModalClass = "";
     public bool ShowBackdrop = false;
 
+
+
+    public string StartDateProxy {
+        get => tempGoalDay.StartDate.ToString("HH\\:mm");
+        set
+        {
+            TimeSpan StartTime;
+            TimeSpan.TryParseExact(value, "hh\\:mm\\:ss", null, out StartTime);
+            tempGoalDay.StartDate = tempGoalDay.StartDate.Date + StartTime; 
+        }
+    }
+
     public void Save()
     {
         if (tempGoalDay.Note != String.Empty)
@@ -72,6 +95,8 @@
         }
 
         Console.WriteLine("2. temp goal note:" + tempGoalDay.Note);
+
+        tempGoalDay.StartDate = editGoalDay.StartDate;
     }
 
 

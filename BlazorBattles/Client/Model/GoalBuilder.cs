@@ -17,8 +17,8 @@ namespace BlazorBattles.Client.Model
         public bool Saturday { get; set; } = true;
         public bool Sunday { get; set; } = true;
 
-        public bool IsWholeDay { get; set; } = true;
-        public string Time { get; set; }
+        public bool IsAllDay { get; set; } = true;
+        public string StartTime { get; set; }
         public string Length { get; set; }
 
     }
