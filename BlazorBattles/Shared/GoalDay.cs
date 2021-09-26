@@ -10,7 +10,7 @@ namespace BlazorBattles.Shared
     {
         public bool IsAllDay { get; set; }
         public DateTime StartDate { get; set; }
-        public TimeSpan Length { get; set; }
+        public TimeSpan LengthTime { get; set; } 
         public string Note { get; set; }
 
     }

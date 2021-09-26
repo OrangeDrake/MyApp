@@ -35,7 +35,7 @@
         @if (IsTimeVisible)
         {
             <span>Starting Time </span><InputText type="time" @bind-Value="@totalGoalBuilder.StartTime" />
-            <span>Length of session </span><InputText type="time" @bind-Value="@totalGoalBuilder.Length" />
+            <span>Length of session </span><InputText type="time" @bind-Value="@totalGoalBuilder.LengthTime" />
 
         }
     </div>
@@ -150,10 +150,7 @@
             }
         </tbody>
     </table>
-
-
 }
-
 
 
 @code {
@@ -168,7 +165,7 @@
         {
             totalGoalBuilder.IsAllDay = !value;
             totalGoalBuilder.StartTime = "00:00:00";
-            totalGoalBuilder.Length = "01:00:00";
+            totalGoalBuilder.LengthTime = "01:00:00";
         }
     }
 
@@ -202,7 +199,7 @@
     private void CellClicked(DateTime currentDay)
     {
 
-        modalGoalDay = goal.Days.First(goalDay => goalDay.StartDate.ToShortDateString().Equals(currentDay.ToShortDateString()));
+        modalGoalDay = goal.Days.First(goalDay => goalDay.StartDate.Date.Equals(currentDay.Date));
 
         Modal.Open();
     }
@@ -285,7 +282,8 @@
         }
 
         goal = new Goal();
-        goal.Name = "Some name";
+        goal.Name = (String)totalGoalBuilder.Name.Clone();
+
 
         startCalendarDay = totalGoalBuilder.StartDate;
 
@@ -301,17 +299,16 @@
         TimeSpan StartTime = TimeSpan.FromHours(0);
         TimeSpan LocalLenght;
         TimeSpan.TryParseExact(totalGoalBuilder.StartTime, "hh\\:mm\\:ss", null, out StartTime);
-        TimeSpan.TryParseExact(totalGoalBuilder.StartTime, "hh\\:mm\\:ss", null, out LocalLenght);
+        TimeSpan.TryParseExact(totalGoalBuilder.LengthTime, "hh\\:mm\\:ss", null, out LocalLenght);
 
         while (currentCalendarDay <= totalGoalBuilder.EndDate)
         {
             PropertyInfo pinfo = typeof(GoalBuilder).GetProperty(currentCalendarDay.DayOfWeek.ToString());
             if ((bool)pinfo.GetValue(totalGoalBuilder, null))
             {
-                goal.Days.Add(new GoalDay { StartDate = currentCalendarDay + StartTime, Length = LocalLenght, IsAllDay = totalGoalBuilder.IsAllDay});
+                goal.Days.Add(new GoalDay { StartDate = currentCalendarDay + StartTime, LengthTime = LocalLenght, IsAllDay = totalGoalBuilder.IsAllDay});
             }
             currentCalendarDay = currentCalendarDay.AddDays(1);
-            goal.Name = (String)totalGoalBuilder.Name.Clone();
         }
 
         isCalendarVissible = true;
@@ -328,7 +325,7 @@
         GoalDay currentGoalDay = goal.Days.ElementAt(dayIndex);
         //Console.WriteLine("note:" + currentGoalDay.Note);
 
-        if (currentGoalDay.StartDate.ToShortDateString() == currentCalendarDay.ToShortDateString())
+        if (currentGoalDay.StartDate.Date == currentCalendarDay.Date)
         {
             dayIndex++;
             return "border: 2px solid black; background-color: PaleGreen; font-weight: 600; cursor: pointer;";

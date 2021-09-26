@@ -19,7 +19,7 @@ namespace BlazorBattles.Client.Model
 
         public bool IsAllDay { get; set; } = true;
         public string StartTime { get; set; }
-        public string Length { get; set; }
+        public string LengthTime { get; set; } = "01:00:00";
 
     }
 }

@@ -17,7 +17,7 @@
                         @if (!tempGoalDay.IsAllDay)
                         {
                             <span>Starting Time </span><InputText type="time" @bind-Value="@StartDateProxy" />
-                            @*<span>Length of session </span><InputText type="time" @bind-Value="@tempGoalDay.Length" />*@
+                            <span>Length of session </span><InputText type="time" @bind-Value="@LengthTimeProxy" />
 
                         }
                     </div>
@@ -55,17 +55,33 @@
     public string ModalClass = "";
     public bool ShowBackdrop = false;
 
-
-
     public string StartDateProxy {
         get => tempGoalDay.StartDate.ToString("HH\\:mm");
         set
         {
             TimeSpan StartTime;
             TimeSpan.TryParseExact(value, "hh\\:mm\\:ss", null, out StartTime);
-            tempGoalDay.StartDate = tempGoalDay.StartDate.Date + StartTime; 
+            tempGoalDay.StartDate = tempGoalDay.StartDate.Date + StartTime;
         }
     }
+
+    public string LengthTimeProxy
+    {
+        get
+        {
+            DateTime LocalDateTime = new DateTime();
+            LocalDateTime = LocalDateTime + tempGoalDay.LengthTime;
+            return LocalDateTime.ToString("HH\\:mm");            
+        }
+
+        set
+        {
+            TimeSpan LocalLengthTime;
+            TimeSpan.TryParseExact(value, "hh\\:mm\\:ss", null, out LocalLengthTime);
+            tempGoalDay.LengthTime = LocalLengthTime;
+        }
+    }
+
 
     public void Save()
     {
@@ -73,6 +89,10 @@
         {
             editGoalDay.Note = (String)tempGoalDay.Note.Clone();
         }
+
+        editGoalDay.StartDate = tempGoalDay.StartDate;
+        editGoalDay.LengthTime = tempGoalDay.LengthTime;
+        editGoalDay.IsAllDay = tempGoalDay.IsAllDay;
     }
 
     protected override void OnParametersSet()
@@ -97,6 +117,8 @@
         Console.WriteLine("2. temp goal note:" + tempGoalDay.Note);
 
         tempGoalDay.StartDate = editGoalDay.StartDate;
+        tempGoalDay.LengthTime = editGoalDay.LengthTime;
+        tempGoalDay.IsAllDay = editGoalDay.IsAllDay;
     }
 
 
