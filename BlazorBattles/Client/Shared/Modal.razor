@@ -2,7 +2,17 @@
     <div class="modal-dialog" role="document">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title">@(tempGoalDay.StartDate)</h5>
+                <h5 class="modal-title">
+                    @if (isInEdit)
+                    {
+                        <span>Edit Day</span>
+                    }
+                    else
+                    {
+                        {<span>Create Day</span>}
+                    }
+                    <span>@(tempGoalDay.StartDate)</span>
+                </h5>
                 <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                     <span aria-hidden="true">&times;</span>
                 </button>
@@ -22,14 +32,22 @@
                         }
                     </div>
                     <div class="form-group">
-                        <label for="note">Bio</label>
+                        <label for="note">Note</label>
                         <InputTextArea id="note" @bind-Value="tempGoalDay.Note" class="form-control"></InputTextArea>
 
                     </div>
                 </EditForm>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-primary" @onclick="() => Save()">Save changes</button>
+                @if (isInEdit)
+                {
+                    <button type="button" class="btn btn-primary" @onclick="() => Save()">Save changes</button>
+                    <button type="button" class="btn btn-danger" @onclick="() => Remove()">Remove day</button>
+                }
+                else
+                {
+                    <button type="button" class="btn btn-primary" @onclick="() => Create()">Save changes</button>
+                }
                 <button type="button" class="btn btn-secondary" data-dismiss="modal" @onclick="() => Close()">Close</button>
             </div>
         </div>
@@ -48,6 +66,15 @@
 
     [Parameter]
     public GoalDay editGoalDay { get; set; }
+    [Parameter]
+    public bool isInEdit { get; set; }
+
+    [Parameter]
+    public EventCallback OnCreateButtonClicked { get; set; }
+    [Parameter]
+    public EventCallback OnDeleteButtonClicked { get; set; }
+
+
     public GoalDay tempGoalDay { get; set; }
 
     public Guid Guid = Guid.NewGuid();
@@ -55,7 +82,8 @@
     public string ModalClass = "";
     public bool ShowBackdrop = false;
 
-    public string StartDateProxy {
+    public string StartDateProxy
+    {
         get => tempGoalDay.StartDate.ToString("HH\\:mm");
         set
         {
@@ -71,7 +99,7 @@
         {
             DateTime LocalDateTime = new DateTime();
             LocalDateTime = LocalDateTime + tempGoalDay.LengthTime;
-            return LocalDateTime.ToString("HH\\:mm");            
+            return LocalDateTime.ToString("HH\\:mm");
         }
 
         set
@@ -82,6 +110,15 @@
         }
     }
 
+    private async void Create()
+    {
+        await OnCreateButtonClicked.InvokeAsync();
+    }
+
+    private async void Remove()
+    {
+        await OnDeleteButtonClicked.InvokeAsync();
+    }
 
     public void Save()
     {
@@ -102,9 +139,6 @@
 
         tempGoalDay = new GoalDay();
 
-        Console.WriteLine("1. temp goal note:" + tempGoalDay.Note);
-        Console.WriteLine("editGoalDay goal note" + editGoalDay.Note);
-
         if (editGoalDay.Note == null)
         {
             tempGoalDay.Note = String.Empty;
@@ -113,8 +147,6 @@
         {
             tempGoalDay.Note = (String)editGoalDay.Note.Clone();
         }
-
-        Console.WriteLine("2. temp goal note:" + tempGoalDay.Note);
 
         tempGoalDay.StartDate = editGoalDay.StartDate;
         tempGoalDay.LengthTime = editGoalDay.LengthTime;
@@ -125,7 +157,6 @@
 
     public void Open()
     {
-
         ModalDisplay = "block;";
         ModalClass = "Show";
         ShowBackdrop = true;

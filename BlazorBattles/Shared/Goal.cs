@@ -11,7 +11,9 @@ namespace BlazorBattles.Shared
         public String Name { get; set; }
         public List<GoalDay> Days { get; } = new List<GoalDay>();
 
-        public TimeSpan Time { get; set; }
+        public bool IsAllDayGenerated { get; set; }
+        public DateTime StartDateGenerated { get; set; }
+        public TimeSpan LengthTimeGenerated { get; set; }
 
     }
 }

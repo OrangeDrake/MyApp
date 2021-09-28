@@ -4,8 +4,6 @@
 <h3>CreateGoal111</h3>
 <br />
 
-
-
 <EditForm EditContext="@editContext" OnValidSubmit="CreateCurrentGoal" style="max-width : 600px">
     <div class="form-group">
         <label for="name">Goal Name</label>
@@ -25,7 +23,6 @@
     <div class="form-group">
         <label for="endDate">End Date</label>
         <InputDate id="endDate" @bind-Value="totalGoalBuilder.EndDate" class="form-control"></InputDate>
-
     </div>
 
     <div class="form-group">
@@ -36,10 +33,8 @@
         {
             <span>Starting Time </span><InputText type="time" @bind-Value="@totalGoalBuilder.StartTime" />
             <span>Length of session </span><InputText type="time" @bind-Value="@totalGoalBuilder.LengthTime" />
-
         }
     </div>
-
 
     <div class="form-group">
         <label for="week">Days</label><br />
@@ -82,7 +77,6 @@
     </div>
 
 
-
     <button style="margin: 8px" type="submit" class="btn btn-primary">Generate plan preview</button>
 
     @if (isLoadPreviousButtonVissible)
@@ -93,8 +87,7 @@
 </EditForm>
 
 
-<Modal @ref="Modal" editGoalDay="modalGoalDay"></Modal>
-
+<Modal @ref="Modal" editGoalDay="modalGoalDay" isInEdit="isModalInEditMode" OnCreateButtonClicked="createGoalDay" OnDeleteButtonClicked="deleteGoalDay"></Modal>
 
 
 <br />
@@ -103,9 +96,9 @@
 {
     currentCalendarDay = firstCalendarDay;
     dayIndex = 0;
+    lastPrintedMonth = -1;
 
-
-    <snan style="background-color: navajowhite;">To fullfil goal <b>@goal.Name</b> was generated <b>@goal.Days.Count</b> active days. Time: @totalGoalBuilder.StartTime</snan>
+    <snan style="background-color: navajowhite;">To fullfil goal <b>@goal.Name</b> was generated <b>@goal.Days.Count</b> active days.</snan>
 
     <br />
 
@@ -153,25 +146,11 @@
 }
 
 
-@code {
-
-    private bool IsTimeVisible
-    {
-        get
-        {
-            return !totalGoalBuilder.IsAllDay;
-        }
-        set
-        {
-            totalGoalBuilder.IsAllDay = !value;
-            totalGoalBuilder.StartTime = "00:00:00";
-            totalGoalBuilder.LengthTime = "01:00:00";
-        }
-    }
-
+@code {    
 
     private Modal Modal { get; set; }
     private GoalDay modalGoalDay { get; set; } = new GoalDay();
+    public bool isModalInEditMode { get; set; }
 
     private Goal goal { get; set; } = null;
     private Goal previousGoal { get; set; } = null;
@@ -192,16 +171,52 @@
 
     int dayIndex = 0;
 
-
     private EditContext editContext;
 
+
+    private bool IsTimeVisible
+    {
+        get
+        {
+            return !totalGoalBuilder.IsAllDay;
+        }
+        set
+        {
+            totalGoalBuilder.IsAllDay = !value;
+            totalGoalBuilder.StartTime = "00:00:00";
+            totalGoalBuilder.LengthTime = "01:00:00";
+        }
+    }
 
     private void CellClicked(DateTime currentDay)
     {
 
-        modalGoalDay = goal.Days.First(goalDay => goalDay.StartDate.Date.Equals(currentDay.Date));
+        GoalDay tempGoalDay = goal.Days.FirstOrDefault(goalDay => goalDay.StartDate.Date.Equals(currentDay.Date));
+        if (tempGoalDay != null)
+        {
+            modalGoalDay = tempGoalDay;
+            isModalInEditMode = true;
+            Modal.Open();
+        }
+        else
+        {
+            TimeSpan genetaredTime = goal.StartDateGenerated.TimeOfDay;
+            modalGoalDay = new GoalDay { IsAllDay = goal.IsAllDayGenerated, StartDate = currentDay.Date + genetaredTime, LengthTime = goal.LengthTimeGenerated };
+            isModalInEditMode = false;
+            Modal.Open();
+        }
+    }
 
-        Modal.Open();
+
+    private void createGoalDay()
+    {
+        goal.Days.Add(modalGoalDay);
+        goal.Days.Sort();
+    }
+
+    private void deleteGoalDay()
+    {
+        goal.Days.Remove(modalGoalDay);
     }
 
 
@@ -263,6 +278,7 @@
                 totalGoalBuilder.Saturday = false;
                 totalGoalBuilder.Sunday = false;
             }
+
             else
             {
                 daysAreDisabled = false;
@@ -301,12 +317,16 @@
         TimeSpan.TryParseExact(totalGoalBuilder.StartTime, "hh\\:mm\\:ss", null, out StartTime);
         TimeSpan.TryParseExact(totalGoalBuilder.LengthTime, "hh\\:mm\\:ss", null, out LocalLenght);
 
+        goal.IsAllDayGenerated = totalGoalBuilder.IsAllDay;
+        goal.StartDateGenerated = currentCalendarDay + StartTime;
+        goal.LengthTimeGenerated = LocalLenght;
+
         while (currentCalendarDay <= totalGoalBuilder.EndDate)
         {
             PropertyInfo pinfo = typeof(GoalBuilder).GetProperty(currentCalendarDay.DayOfWeek.ToString());
             if ((bool)pinfo.GetValue(totalGoalBuilder, null))
             {
-                goal.Days.Add(new GoalDay { StartDate = currentCalendarDay + StartTime, LengthTime = LocalLenght, IsAllDay = totalGoalBuilder.IsAllDay});
+                goal.Days.Add(new GoalDay { StartDate = currentCalendarDay + StartTime, LengthTime = LocalLenght, IsAllDay = totalGoalBuilder.IsAllDay });
             }
             currentCalendarDay = currentCalendarDay.AddDays(1);
         }
@@ -330,20 +350,21 @@
             dayIndex++;
             return "border: 2px solid black; background-color: PaleGreen; font-weight: 600; cursor: pointer;";
         }
-        return "border: 2px dashed black; font-weight: 400;cursor: pointer;";
 
+        return "border: 2px dashed black; font-weight: 400;cursor: pointer;";
     }
 
 
     private void LoadPreviousPlan()
     {
+        Goal tempGoal = goal;
         goal = previousGoal;
+        previousGoal = tempGoal;
 
         startCalendarDay = goal.Days.ElementAt(0).StartDate;
 
         var startDayNumber = (int)startCalendarDay.DayOfWeek;
         startDayNumber = startDayNumber == 0 ? 7 : startDayNumber;
-
 
         firstCalendarDay = startCalendarDay.AddDays(-startDayNumber + 1);
         endCalendarDay = goal.Days.ElementAt(goal.Days.Count - 1).StartDate;
