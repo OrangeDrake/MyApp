@@ -28,7 +28,6 @@
                         {
                             <span>Starting Time </span><InputText type="time" @bind-Value="@StartDateProxy" />
                             <span>Length of session </span><InputText type="time" @bind-Value="@LengthTimeProxy" />
-
                         }
                     </div>
                     <div class="form-group">
@@ -73,6 +72,8 @@
     public EventCallback OnCreateButtonClicked { get; set; }
     [Parameter]
     public EventCallback OnDeleteButtonClicked { get; set; }
+    [Parameter]
+    public EventCallback OnGoalDayChanged { get; set; }
 
 
     public GoalDay tempGoalDay { get; set; }
@@ -112,7 +113,13 @@
 
     private async void Create()
     {
+
+        editGoalDay.StartDate = tempGoalDay.StartDate;
+        editGoalDay.LengthTime = tempGoalDay.LengthTime;
+        editGoalDay.IsAllDay = tempGoalDay.IsAllDay;
+
         await OnCreateButtonClicked.InvokeAsync();
+        await OnGoalDayChanged.InvokeAsync();
     }
 
     private async void Remove()
@@ -120,7 +127,7 @@
         await OnDeleteButtonClicked.InvokeAsync();
     }
 
-    public void Save()
+    public async void Save()
     {
         if (tempGoalDay.Note != String.Empty)
         {
@@ -130,7 +137,10 @@
         editGoalDay.StartDate = tempGoalDay.StartDate;
         editGoalDay.LengthTime = tempGoalDay.LengthTime;
         editGoalDay.IsAllDay = tempGoalDay.IsAllDay;
+
+        await OnGoalDayChanged.InvokeAsync();
     }
+
 
     protected override void OnParametersSet()
     {
