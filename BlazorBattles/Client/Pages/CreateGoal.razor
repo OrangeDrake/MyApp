@@ -32,7 +32,7 @@
         @if (IsTimeVisible)
         {
             <span>Starting Time </span><InputText type="time" @bind-Value="@totalGoalBuilder.StartTime" />
-            <span>Length of session </span><InputText type="time" @bind-Value="@totalGoalBuilder.LengthTime" />
+            <span> Length of session </span><InputText type="time" @bind-Value="@totalGoalBuilder.LengthTime" />
         }
     </div>
 
@@ -134,12 +134,13 @@
                         else
                         {
                             DateTime cellCalendarDay = currentCalendarDay;
-                            <td style="@GetStyle(currentCalendarDay)" @onclick="() =>CellClicked(cellCalendarDay)">
+                            <td style="@GetStyleAndDecideIfIsDayInGoal(currentCalendarDay)" @onclick="() =>CellClicked(cellCalendarDay)">
                                 <span>@currentCalendarDay.ToString("dd")</span>
                                 @if (isDayInGoal && !currentGoalDay.IsAllDay)
                                 {
-                                    <br /><span>@currentGoalDay.StartDate.ToString("HH:mm") </span>
+                                    <br /><span style="font-weight: 300; font-style : italic; align-self : center">@currentGoalDay.StartDate.ToString("HH:mm") - @((currentGoalDay.StartDate + currentGoalDay.LengthTime).ToString("HH:mm"))</span>                                   
                                 }
+                                 <br /><span class="note">Hello world this is a long sentence</span>
                             </td>
                         }
                         currentCalendarDay = currentCalendarDay.AddDays(1);
@@ -348,7 +349,7 @@
     }
 
 
-    private string GetStyle(DateTime currentCalendarDay)
+    private string GetStyleAndDecideIfIsDayInGoal(DateTime currentCalendarDay)
     {
         if (dayIndex == goal.Days.Count)
         {
