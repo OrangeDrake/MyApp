@@ -7,7 +7,7 @@ namespace BlazorBattles.Client.Model
         public string Name { get; set; } 
         public DateTime StartDate { get; set; } = DateTime.Today;
         public int Duration { get; set; } = 30;
-        public DateTime EndDate { get; set; } = DateTime.Now.AddDays(30);
+        public DateTime EndDate { get; set; } = DateTime.Now.AddDays(30-1);
         public int CalendarValue { get; set; } = 0;
         public bool Monday { get; set; } = true;
         public bool Tuesday { get; set; } = true;
@@ -20,6 +20,9 @@ namespace BlazorBattles.Client.Model
         public bool IsAllDay { get; set; } = true;
         public string StartTime { get; set; }
         public string LengthTime { get; set; } = "01:00:00";
+
+        public int TotalValue { get; set; }
+        public string Unit { get; set; }
 
     }
 }

@@ -14,6 +14,8 @@ namespace BlazorBattles.Shared
         public bool IsAllDayGenerated { get; set; }
         public DateTime StartDateGenerated { get; set; }
         public TimeSpan LengthTimeGenerated { get; set; }
+        public int TotalValue { get; set; }
+        public string Unit { get; set; }
 
     }
 }

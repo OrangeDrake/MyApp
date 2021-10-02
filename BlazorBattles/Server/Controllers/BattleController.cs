@@ -1,9 +1,7 @@
 ﻿using BlazorBattles.Shared;
 using BlazorBattles.Server.Data;
 using BlazorBattles.Server.Services;
-using BlazorBattles.Shared;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System;

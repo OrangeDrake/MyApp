@@ -13,6 +13,8 @@ namespace BlazorBattles.Shared
         public TimeSpan LengthTime { get; set; } 
         public string Note { get; set; }
 
+        public int Value { get; set; }
+
         public int CompareTo(GoalDay other)
         {
             // A null value means that this object is greater.

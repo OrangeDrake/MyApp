@@ -20,6 +20,17 @@
             <div class="modal-body">
                 <p>Modal body text goes here.</p>
                 <EditForm Model="tempGoalDay">
+
+                    <div class="form-group">
+                        <label for="value">Value</label>
+                        <InputNumber id="value" @bind-Value="tempGoalDay.Value" class="form-control"></InputNumber>
+
+                        <InputRadioGroup id="recalculate" @bind-Value="recalculateMode" class="form-control">
+                            <InputRadio Value="0" /><span>Redistribute Value increase/decrease to other Dayes</span><br />
+                            <InputRadio Value="1" /><span>Increase/decrease Goal Total Value</span>
+                        </InputRadioGroup>
+                    </div>
+
                     <div class="form-group">
                         <label for="showTime">All Day</label>
                         <InputCheckbox id="showTime" @bind-Value="tempGoalDay.IsAllDay" class="form-checked"></InputCheckbox>
@@ -40,12 +51,12 @@
             <div class="modal-footer">
                 @if (isInEdit)
                 {
-                    <button type="button" class="btn btn-primary" @onclick="() => Save()">Save changes</button>
+                    <button type="button" class="btn btn-primary" @onclick="() => SaveGoalDay()">Save changes</button>
                     <button type="button" class="btn btn-danger" @onclick="() => Remove()">Remove day</button>
                 }
                 else
                 {
-                    <button type="button" class="btn btn-primary" @onclick="() => Create()">Save changes</button>
+                    <button type="button" class="btn btn-primary" @onclick="() =>  SaveGoalDay()">Add day</button>
                 }
                 <button type="button" class="btn btn-secondary" data-dismiss="modal" @onclick="() => Close()">Close</button>
             </div>
@@ -74,7 +85,10 @@
     public EventCallback OnDeleteButtonClicked { get; set; }
     [Parameter]
     public EventCallback OnGoalDayChanged { get; set; }
+    [Parameter]
+    public EventCallback<int> OnValueChanged { get; set; }
 
+    public int recalculateMode { get; set; }
 
     public GoalDay tempGoalDay { get; set; }
 
@@ -111,24 +125,10 @@
         }
     }
 
-    private async void Create()
+    private async void SaveGoalDay()
     {
+        bool recalculateValue = false;
 
-        editGoalDay.StartDate = tempGoalDay.StartDate;
-        editGoalDay.LengthTime = tempGoalDay.LengthTime;
-        editGoalDay.IsAllDay = tempGoalDay.IsAllDay;
-
-        await OnCreateButtonClicked.InvokeAsync();
-        await OnGoalDayChanged.InvokeAsync();
-    }
-
-    private async void Remove()
-    {
-        await OnDeleteButtonClicked.InvokeAsync();
-    }
-
-    public async void Save()
-    {
         if (tempGoalDay.Note != String.Empty)
         {
             editGoalDay.Note = (String)tempGoalDay.Note.Clone();
@@ -138,7 +138,32 @@
         editGoalDay.LengthTime = tempGoalDay.LengthTime;
         editGoalDay.IsAllDay = tempGoalDay.IsAllDay;
 
+        if (editGoalDay.Value != tempGoalDay.Value)
+        {
+            recalculateValue = true;
+        }
+
+        editGoalDay.Value = tempGoalDay.Value;
+
+        if (!isInEdit)
+        {
+            await OnCreateButtonClicked.InvokeAsync(); // will add goalDay to List
+        }
+
+        if (recalculateValue)
+        {
+            await OnValueChanged.InvokeAsync(recalculateMode);
+        }
+
         await OnGoalDayChanged.InvokeAsync();
+        Close();
+
+    }
+
+    private async void Remove()
+    {
+        await OnDeleteButtonClicked.InvokeAsync();
+        Close();
     }
 
 
@@ -161,6 +186,9 @@
         tempGoalDay.StartDate = editGoalDay.StartDate;
         tempGoalDay.LengthTime = editGoalDay.LengthTime;
         tempGoalDay.IsAllDay = editGoalDay.IsAllDay;
+        tempGoalDay.Value = editGoalDay.Value;
+
+        recalculateMode = 0;
     }
 
 

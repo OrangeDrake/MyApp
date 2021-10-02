@@ -11,6 +11,16 @@
     </div>
 
     <div class="form-group">
+        <label for="value">Goal Total Value</label>
+        <InputNumber id="value" @bind-Value="totalGoalBuilder.TotalValue" class="form-control"></InputNumber>
+    </div>
+
+    <div class="form-group">
+        <label for="unit">Unit</label>
+        <InputText id="unit" @bind-Value="totalGoalBuilder.Unit" class="form-control"></InputText>
+    </div>
+
+    <div class="form-group">
         <label for="startDate">Start Date</label>
         <InputDate id="startDate" @bind-Value="totalGoalBuilder.StartDate" class="form-control"></InputDate>
     </div>
@@ -87,7 +97,7 @@
 </EditForm>
 
 
-<Modal @ref="Modal" editGoalDay="modalGoalDay" isInEdit="isModalInEditMode" OnCreateButtonClicked="createGoalDay" OnDeleteButtonClicked="deleteGoalDay" OnGoalDayChanged = "Refresh"></Modal>
+<Modal @ref="Modal" editGoalDay="modalGoalDay" isInEdit="isModalInEditMode" OnCreateButtonClicked="createGoalDay" OnDeleteButtonClicked="deleteGoalDay" OnGoalDayChanged="Refresh" OnValueChanged="recalculate"></Modal>
 
 
 <br />
@@ -98,7 +108,7 @@
     dayIndex = 0;
     lastPrintedMonth = -1;
 
-    <snan style="background-color: navajowhite;">To fullfil goal <b>@goal.Name</b> is planned <b>@goal.Days.Count</b> days.</snan>
+<span style="background-color: navajowhite;">To fullfil goal <b>@goal.Name</b> is planned reach <b>@goal.TotalValue @goal.Unit</b> spread over <b>@goal.Days.Count</b> days.</span>
 
     <br />
 
@@ -134,13 +144,17 @@
                         else
                         {
                             DateTime cellCalendarDay = currentCalendarDay;
-                            <td style="@GetStyleAndDecideIfIsDayInGoal(currentCalendarDay)" @onclick="() =>CellClicked(cellCalendarDay)">
-                                <span>@currentCalendarDay.ToString("dd")</span>
-                                @if (isDayInGoal && !currentGoalDay.IsAllDay)
+                            <td style="@GetStyleAndDecideIfIsDayInGoal(currentCalendarDay)" @onclick="() => CellClicked(cellCalendarDay)">
+                                <span>@currentCalendarDay.ToString("dd"). </span>
+                                @if (isDayInGoal)
                                 {
-                                    <br /><span style="font-weight: 300; font-style : italic; align-self : center">@currentGoalDay.StartDate.ToString("HH:mm") - @((currentGoalDay.StartDate + currentGoalDay.LengthTime).ToString("HH:mm"))</span>                                   
+                                    <span style="background-color: navajowhite">@currentGoalDay.Value @goal.Unit </span>
+                                    @if (!currentGoalDay.IsAllDay)
+                                    {
+                                        <br /><span style="font-weight: 300; font-style : italic; align-self : center">@currentGoalDay.StartDate.ToString("HH:mm") - @((currentGoalDay.StartDate + currentGoalDay.LengthTime).ToString("HH:mm"))</span>
+                                    }
                                 }
-                                 <br /><span class="note">Hello world this is a long sentence</span>
+                                <br /><span class="note">@currentGoalDay.Note</span>
                             </td>
                         }
                         currentCalendarDay = currentCalendarDay.AddDays(1);
@@ -182,6 +196,19 @@
     int dayIndex = 0;
 
     private EditContext editContext;
+
+    private void recalculate(int recalculateMode)
+    {
+        if (recalculateMode == 0)
+        {
+            DistributeTotalValueToDays(modalGoalDay);
+        }
+        else if(recalculateMode == 1)
+        {
+
+        }
+    }
+
 
     private void Refresh()
     {
@@ -249,19 +276,19 @@
 
         if (e.FieldIdentifier.FieldName == "StartDate")
         {
-            totalGoalBuilder.EndDate = totalGoalBuilder.StartDate.AddDays(totalGoalBuilder.Duration);
+            totalGoalBuilder.EndDate = totalGoalBuilder.StartDate.AddDays(totalGoalBuilder.Duration-1);
             Console.WriteLine("zmena start date????????????????????????????");
         }
 
         else if (e.FieldIdentifier.FieldName == "Duration")
         {
-            totalGoalBuilder.EndDate = totalGoalBuilder.StartDate.AddDays(totalGoalBuilder.Duration);
+            totalGoalBuilder.EndDate = totalGoalBuilder.StartDate.AddDays(totalGoalBuilder.Duration-1);
             Console.WriteLine("zmena duration????????????????????????????");
         }
 
         else if (e.FieldIdentifier.FieldName == "EndDate")
         {
-            totalGoalBuilder.Duration = (totalGoalBuilder.EndDate - totalGoalBuilder.StartDate).Days;
+            totalGoalBuilder.Duration = (totalGoalBuilder.EndDate - totalGoalBuilder.StartDate).Days +1;
         }
         else if (e.FieldIdentifier.FieldName == "CalendarValue")
         {
@@ -334,6 +361,8 @@
         goal.IsAllDayGenerated = totalGoalBuilder.IsAllDay;
         goal.StartDateGenerated = currentCalendarDay + StartTime;
         goal.LengthTimeGenerated = LocalLenght;
+        goal.TotalValue = totalGoalBuilder.TotalValue;
+        goal.Unit = totalGoalBuilder.Unit;
 
         while (currentCalendarDay <= totalGoalBuilder.EndDate)
         {
@@ -345,14 +374,53 @@
             currentCalendarDay = currentCalendarDay.AddDays(1);
         }
 
+        int Value = totalGoalBuilder.TotalValue / goal.Days.Count;
+        int RestofValue = totalGoalBuilder.TotalValue % goal.Days.Count;
+        DistributeTotalValueToDays(null);
+
         isCalendarVissible = true;
     }
+
+    private void DistributeTotalValueToDays(GoalDay excludedday)
+    {
+        int totalValue = goal.TotalValue;
+        int daysCount = goal.Days.Count;
+
+        if (excludedday != null)
+        {
+            totalValue -= excludedday.Value;
+            daysCount--;
+        }
+
+        int Value = totalValue / daysCount;
+        int RestofValue = totalValue % daysCount;
+
+        foreach (GoalDay day in goal.Days)
+        {
+            if (day != excludedday)
+            {
+                day.Value = Value;
+            }
+        }
+        int i = 0;
+        while (RestofValue > 0)
+        {
+            if (goal.Days[i] != excludedday)
+            {
+                goal.Days[i].Value++;
+                RestofValue--;
+            }
+            i++;
+        }
+    }
+
 
 
     private string GetStyleAndDecideIfIsDayInGoal(DateTime currentCalendarDay)
     {
         if (dayIndex == goal.Days.Count)
         {
+            isDayInGoal = false;
             return "border: 2px dashed black; font-weight: 400;cursor: pointer;";
         }
 
