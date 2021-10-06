@@ -8,6 +8,7 @@ namespace BlazorBattles.Shared
 {
     public class GoalDay: IComparable<GoalDay>
     {
+        public int Id { get; set; }
         public bool IsAllDay { get; set; }
         public DateTime StartDate { get; set; }
         public TimeSpan LengthTime { get; set; } 

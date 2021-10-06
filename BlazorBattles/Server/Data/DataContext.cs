@@ -40,6 +40,8 @@ namespace BlazorBattles.Server.Data
         public DbSet<UserUnit> UserUnits { get; set; }
 
         public DbSet<Battle> Battles { get; set; }
+        public DbSet<Goal> Goals { get; set; }
+        public DbSet<GoalDay> GoalDays { get; set; }
     }
 
 

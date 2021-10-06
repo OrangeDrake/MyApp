@@ -24,6 +24,7 @@ namespace BlazorBattles.Shared
         public int Battles { get; set; }
         public int Victories { get; set; }
         public int Defeats { get; set; }
+        public List<Goal> MyProperty { get; set; }
 
 
 

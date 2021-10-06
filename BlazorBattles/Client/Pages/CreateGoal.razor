@@ -1,10 +1,11 @@
 ﻿@page "/creategoal"
+@inject IGoalService GoalService
 @attribute [Authorize]
 
 <h3>CreateGoal111</h3>
 <br />
 
-<EditForm EditContext="@editContext" OnValidSubmit="CreateCurrentGoal" style="max-width : 600px">
+<EditForm EditContext="@editContext" OnValidSubmit="GenerateCurrentGoal" style="max-width : 600px">
     <div class="form-group">
         <label for="name">Goal Name</label>
         <InputText id="name" @bind-Value="totalGoalBuilder.Name" class="form-control"></InputText>
@@ -108,7 +109,7 @@
     dayIndex = 0;
     lastPrintedMonth = -1;
 
-<span style="background-color: navajowhite;">To fullfil goal <b>@goal.Name</b> is planned reach <b>@goal.TotalValue @goal.Unit</b> spread over <b>@goal.Days.Count</b> days.</span>
+    <span style="background-color: navajowhite;">To fullfil goal <b>@goal.Name</b> is planned reach <b>@goal.TotalValue @goal.Unit</b> spread over <b>@goal.Days.Count</b> days.</span>
 
     <br />
 
@@ -164,7 +165,11 @@
             }
         </tbody>
     </table>
+
+    <br />
+    <button class="btn btn-primary" @onclick="CreateGoalHandler">Create Goal</button>
 }
+
 
 
 @code {
@@ -197,15 +202,22 @@
 
     private EditContext editContext;
 
+    public async void CreateGoalHandler()
+    {
+
+        await GoalService.AddGoal(goal);
+    }
+
+
     private void recalculate(int recalculateMode)
     {
         if (recalculateMode == 0)
         {
             DistributeTotalValueToDays(modalGoalDay);
         }
-        else if(recalculateMode == 1)
+        else if (recalculateMode == 1)
         {
-
+            RecalcutateTotalValue();
         }
     }
 
@@ -276,19 +288,19 @@
 
         if (e.FieldIdentifier.FieldName == "StartDate")
         {
-            totalGoalBuilder.EndDate = totalGoalBuilder.StartDate.AddDays(totalGoalBuilder.Duration-1);
+            totalGoalBuilder.EndDate = totalGoalBuilder.StartDate.AddDays(totalGoalBuilder.Duration - 1);
             Console.WriteLine("zmena start date????????????????????????????");
         }
 
         else if (e.FieldIdentifier.FieldName == "Duration")
         {
-            totalGoalBuilder.EndDate = totalGoalBuilder.StartDate.AddDays(totalGoalBuilder.Duration-1);
+            totalGoalBuilder.EndDate = totalGoalBuilder.StartDate.AddDays(totalGoalBuilder.Duration - 1);
             Console.WriteLine("zmena duration????????????????????????????");
         }
 
         else if (e.FieldIdentifier.FieldName == "EndDate")
         {
-            totalGoalBuilder.Duration = (totalGoalBuilder.EndDate - totalGoalBuilder.StartDate).Days +1;
+            totalGoalBuilder.Duration = (totalGoalBuilder.EndDate - totalGoalBuilder.StartDate).Days + 1;
         }
         else if (e.FieldIdentifier.FieldName == "CalendarValue")
         {
@@ -329,7 +341,7 @@
     }
 
 
-    private void CreateCurrentGoal()
+    private void GenerateCurrentGoal()
     {
         previousGoal = goal;
 
@@ -412,6 +424,18 @@
             }
             i++;
         }
+    }
+
+    private void RecalcutateTotalValue()
+    {
+        int totalValue = 0;
+
+        foreach (GoalDay day in goal.Days)
+        {
+            totalValue += day.Value;
+        }
+
+        goal.TotalValue = totalValue;
     }
 
 

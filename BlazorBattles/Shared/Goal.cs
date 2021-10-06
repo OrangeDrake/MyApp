@@ -8,8 +8,10 @@ namespace BlazorBattles.Shared
 {
     public class Goal
     {
+        public int Id { get; set; }
+        public int UserId { get; set; }
         public String Name { get; set; }
-        public List<GoalDay> Days { get; } = new List<GoalDay>();
+        public List<GoalDay> Days { get; set; } = new List<GoalDay>();
 
         public bool IsAllDayGenerated { get; set; }
         public DateTime StartDateGenerated { get; set; }

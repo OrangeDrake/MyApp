@@ -32,10 +32,7 @@ namespace BlazorBattles.Server.Migrations
                     b.Property<DateTime>("Battledate")
                         .HasColumnType("datetime2");
 
-                    b.Property<int>("OppenentId")
-                        .HasColumnType("int");
-
-                    b.Property<int?>("OpponentId")
+                    b.Property<int>("OpponentId")
                         .HasColumnType("int");
 
                     b.Property<int>("RountFought")
@@ -56,6 +53,73 @@ namespace BlazorBattles.Server.Migrations
                     b.HasIndex("WinnerId");
 
                     b.ToTable("Battles");
+                });
+
+            modelBuilder.Entity("BlazorBattles.Shared.Goal", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+
+                    b.Property<bool>("IsAllDayGenerated")
+                        .HasColumnType("bit");
+
+                    b.Property<TimeSpan>("LengthTimeGenerated")
+                        .HasColumnType("time");
+
+                    b.Property<string>("Name")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("StartDateGenerated")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("TotalValue")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Unit")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int?>("UserId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("Goals");
+                });
+
+            modelBuilder.Entity("BlazorBattles.Shared.GoalDay", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+
+                    b.Property<int?>("GoalId")
+                        .HasColumnType("int");
+
+                    b.Property<bool>("IsAllDay")
+                        .HasColumnType("bit");
+
+                    b.Property<TimeSpan>("LengthTime")
+                        .HasColumnType("time");
+
+                    b.Property<string>("Note")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("StartDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("Value")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("GoalId");
+
+                    b.ToTable("GoalDay");
                 });
 
             modelBuilder.Entity("BlazorBattles.Shared.Unit", b =>
@@ -169,12 +233,13 @@ namespace BlazorBattles.Server.Migrations
                     b.HasOne("BlazorBattles.Shared.User", "Opponent")
                         .WithMany()
                         .HasForeignKey("OpponentId")
-                        .OnDelete(DeleteBehavior.NoAction);
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
 
                     b.HasOne("BlazorBattles.Shared.User", "Winner")
                         .WithMany()
                         .HasForeignKey("WinnerId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 
                     b.Navigation("Attacker");
@@ -182,6 +247,20 @@ namespace BlazorBattles.Server.Migrations
                     b.Navigation("Opponent");
 
                     b.Navigation("Winner");
+                });
+
+            modelBuilder.Entity("BlazorBattles.Shared.Goal", b =>
+                {
+                    b.HasOne("BlazorBattles.Shared.User", null)
+                        .WithMany("MyProperty")
+                        .HasForeignKey("UserId");
+                });
+
+            modelBuilder.Entity("BlazorBattles.Shared.GoalDay", b =>
+                {
+                    b.HasOne("BlazorBattles.Shared.Goal", null)
+                        .WithMany("Days")
+                        .HasForeignKey("GoalId");
                 });
 
             modelBuilder.Entity("BlazorBattles.Shared.UserUnit", b =>
@@ -201,8 +280,15 @@ namespace BlazorBattles.Server.Migrations
                     b.Navigation("Unit");
                 });
 
+            modelBuilder.Entity("BlazorBattles.Shared.Goal", b =>
+                {
+                    b.Navigation("Days");
+                });
+
             modelBuilder.Entity("BlazorBattles.Shared.User", b =>
                 {
+                    b.Navigation("MyProperty");
+
                     b.Navigation("Units");
                 });
 #pragma warning restore 612, 618

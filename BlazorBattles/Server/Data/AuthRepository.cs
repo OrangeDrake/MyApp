@@ -59,7 +59,7 @@ namespace BlazorBattles.Server.Data
             _context.Users.Add(user);
             await _context.SaveChangesAsync();
 
-            await AddStartingUnit(user, startUnitId);
+            //await AddStartingUnit(user, startUnitId);
             
             return new ServiceResponse<int> { Data = user.Id, Message = "Registration successful!" };
 

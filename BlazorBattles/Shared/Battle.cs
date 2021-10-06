@@ -12,7 +12,7 @@ namespace BlazorBattles.Shared
         public User Attacker { get; set; }
         public int AttackerId { get; set; }
         public User Opponent { get; set; }
-        public int OpponentId { get; set; }
+        public int OpponentId { get; set; }             
         public User Winner { get; set; }
         public int WinnerId { get; set; }
         public int WinnerDamage { get; set; }
