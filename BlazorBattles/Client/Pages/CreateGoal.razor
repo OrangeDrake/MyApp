@@ -205,7 +205,7 @@
     public async void CreateGoalHandler()
     {
 
-        await GoalService.AddGoal(goal);
+        await GoalService.AddGoal(goal);        
     }
 
 
@@ -437,7 +437,6 @@
 
         goal.TotalValue = totalValue;
     }
-
 
 
     private string GetStyleAndDecideIfIsDayInGoal(DateTime currentCalendarDay)

@@ -14,6 +14,9 @@ namespace BlazorBattles.Client.Services
         private readonly IToastService _toastService;
         private readonly HttpClient _http;
 
+        public IList<Goal> Goals { get; set; } = new List<Goal>();
+        
+
         public GoalService(IToastService toastService, HttpClient http)
         {
             _toastService = toastService;
@@ -21,7 +24,6 @@ namespace BlazorBattles.Client.Services
         }
         public async Task AddGoal(Goal goal)
         {
-            Console.WriteLine("days: "+goal.Days.Count);
             var result = await _http.PostAsJsonAsync<Goal>("api/goal", goal);
 
             if (result.StatusCode != System.Net.HttpStatusCode.OK)
@@ -32,6 +34,16 @@ namespace BlazorBattles.Client.Services
             {
                 _toastService.ShowSuccess(await result.Content.ReadAsStringAsync());
             }
+            Goals.Add(goal);
+        }
+
+        public async Task LoadGoals()
+        {
+            if(Goals.Count == 0)
+            {
+                Goals = await _http.GetFromJsonAsync<IList<Goal>>("api/goal");
+            }
+
         }
 
 }

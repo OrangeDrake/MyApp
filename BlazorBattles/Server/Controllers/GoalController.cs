@@ -3,6 +3,7 @@ using BlazorBattles.Server.Services;
 using BlazorBattles.Shared;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -43,6 +44,14 @@ namespace BlazorBattles.Server.Controllers
             {
 
             }
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> GetUserGoals()
+        {
+            var user = await _utilityService.GetUser();
+            var userGoals = await _context.Goals.Where(goal => goal.UserId == user.Id).ToListAsync();
+            return Ok(userGoals);
         }
 
 

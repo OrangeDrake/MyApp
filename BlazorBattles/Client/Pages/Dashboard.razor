@@ -1,0 +1,36 @@
+﻿@page "/dashboard"
+@inject IGoalService GoalService
+@attribute [Authorize]
+
+<h3>Dashboard</h3>
+
+
+@if (GoalService.Goals.Count > 0 )
+{
+    <table class="table">
+        @foreach (var goal in GoalService.Goals)
+        {
+            <tr>
+                <td>
+                    @goal.Name
+                </td>
+            </tr>
+        }
+
+    </table>
+}
+else
+{
+    <span>Loading Golas ..</span>
+}
+
+
+@code {
+    protected override async Task OnInitializedAsync()
+    {
+
+        await GoalService.LoadGoals();
+
+    }
+
+}

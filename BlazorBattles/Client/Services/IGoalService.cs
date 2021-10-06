@@ -8,6 +8,8 @@ namespace BlazorBattles.Client.Services
 {
     interface IGoalService
     {
+        IList<Goal> Goals { get; set; }
         public Task AddGoal(Goal goal);
+        public Task LoadGoals();
     }
 }
