@@ -1,0 +1,16 @@
+﻿@page "/currentgoal"
+@inject IGoalService GoalService
+
+@attribute [Authorize]
+
+<h3>CurrentGoal</h3>
+
+<EditGoal @ref="editGoal" goal="GoalService.CurrentGoal" isInEdit="true"></EditGoal>
+
+@code {
+
+    private EditGoal editGoal { get; set; }
+    public Goal goal { get; set; }
+
+}
+

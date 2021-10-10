@@ -80,7 +80,7 @@ namespace BlazorBattles.Server.Migrations
                     b.Property<string>("Unit")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int?>("UserId")
+                    b.Property<int>("UserId")
                         .HasColumnType("int");
 
                     b.HasKey("Id");
@@ -97,7 +97,7 @@ namespace BlazorBattles.Server.Migrations
                         .HasColumnType("int")
                         .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
-                    b.Property<int?>("GoalId")
+                    b.Property<int>("GoalId")
                         .HasColumnType("int");
 
                     b.Property<bool>("IsAllDay")
@@ -119,7 +119,7 @@ namespace BlazorBattles.Server.Migrations
 
                     b.HasIndex("GoalId");
 
-                    b.ToTable("GoalDay");
+                    b.ToTable("GoalDays");
                 });
 
             modelBuilder.Entity("BlazorBattles.Shared.Unit", b =>
@@ -253,14 +253,18 @@ namespace BlazorBattles.Server.Migrations
                 {
                     b.HasOne("BlazorBattles.Shared.User", null)
                         .WithMany("MyProperty")
-                        .HasForeignKey("UserId");
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("BlazorBattles.Shared.GoalDay", b =>
                 {
                     b.HasOne("BlazorBattles.Shared.Goal", null)
                         .WithMany("Days")
-                        .HasForeignKey("GoalId");
+                        .HasForeignKey("GoalId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("BlazorBattles.Shared.UserUnit", b =>

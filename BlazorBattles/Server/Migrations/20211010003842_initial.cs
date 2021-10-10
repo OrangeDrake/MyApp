@@ -87,13 +87,13 @@ namespace BlazorBattles.Server.Migrations
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
+                    UserId = table.Column<int>(type: "int", nullable: false),
                     Name = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     IsAllDayGenerated = table.Column<bool>(type: "bit", nullable: false),
                     StartDateGenerated = table.Column<DateTime>(type: "datetime2", nullable: false),
                     LengthTimeGenerated = table.Column<TimeSpan>(type: "time", nullable: false),
                     TotalValue = table.Column<int>(type: "int", nullable: false),
-                    Unit = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    UserId = table.Column<int>(type: "int", nullable: true)
+                    Unit = table.Column<string>(type: "nvarchar(max)", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -103,7 +103,7 @@ namespace BlazorBattles.Server.Migrations
                         column: x => x.UserId,
                         principalTable: "Users",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Restrict);
+                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
@@ -134,27 +134,27 @@ namespace BlazorBattles.Server.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "GoalDay",
+                name: "GoalDays",
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
+                    GoalId = table.Column<int>(type: "int", nullable: false),
                     IsAllDay = table.Column<bool>(type: "bit", nullable: false),
                     StartDate = table.Column<DateTime>(type: "datetime2", nullable: false),
                     LengthTime = table.Column<TimeSpan>(type: "time", nullable: false),
                     Note = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    Value = table.Column<int>(type: "int", nullable: false),
-                    GoalId = table.Column<int>(type: "int", nullable: true)
+                    Value = table.Column<int>(type: "int", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_GoalDay", x => x.Id);
+                    table.PrimaryKey("PK_GoalDays", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_GoalDay_Goals_GoalId",
+                        name: "FK_GoalDays_Goals_GoalId",
                         column: x => x.GoalId,
                         principalTable: "Goals",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Restrict);
+                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateIndex(
@@ -173,8 +173,8 @@ namespace BlazorBattles.Server.Migrations
                 column: "WinnerId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_GoalDay_GoalId",
-                table: "GoalDay",
+                name: "IX_GoalDays_GoalId",
+                table: "GoalDays",
                 column: "GoalId");
 
             migrationBuilder.CreateIndex(
@@ -199,7 +199,7 @@ namespace BlazorBattles.Server.Migrations
                 name: "Battles");
 
             migrationBuilder.DropTable(
-                name: "GoalDay");
+                name: "GoalDays");
 
             migrationBuilder.DropTable(
                 name: "UserUnits");

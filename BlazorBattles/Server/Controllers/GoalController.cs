@@ -26,21 +26,29 @@ namespace BlazorBattles.Server.Controllers
 
 
         [HttpPost]
-        public async Task<IActionResult> CreateGoal( Goal goal)
+        public async Task<IActionResult> CreateGoal(Goal goal)
         {
             var user = await _utilityService.GetUser();
             goal.UserId = user.Id;
-            /*
-             if (user.Bananas < unit.BanaCost)
-             {
-                 return BadRequest("Not enought bananas!");
-             }
-            */
 
             _context.Goals.Add(goal);
-            //_context.GoalDays.Add(goal.Days[0]);
             await _context.SaveChangesAsync();
-            return Ok("Goal added days:"  + goal.Days.Count);
+            return Ok("Goal added days:" + goal.Days.Count);
+            {
+
+            }
+        }
+
+
+        [HttpPut]
+        public async Task<IActionResult> EditeGoal(Goal goal)
+        {
+            var user = await _utilityService.GetUser();
+            goal.UserId = user.Id;
+
+            _context.Goals.Add(goal);
+            await _context.SaveChangesAsync();
+            return Ok("Goal added days:" + goal.Days.Count);
             {
 
             }
@@ -54,6 +62,16 @@ namespace BlazorBattles.Server.Controllers
             return Ok(userGoals);
         }
 
+
+        
+        [HttpGet("days/{GoalId}")]
+        public async Task<IActionResult> GetGoalDays(int GoalId)
+        {
+            var goalDays = await _context.GoalDays.Where(day => day.GoalId == GoalId).ToListAsync();
+            goalDays = await _context.GoalDays.Where(day => day.GoalId == GoalId).ToListAsync();
+            return Ok(goalDays);
+        }
+        
 
     }
 }

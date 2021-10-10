@@ -67,16 +67,27 @@
     </table>
 
     <br />
-    <button class="btn btn-primary" @onclick="CreateGoalHandler">Create Goal</button>
+    @if (isInEdit)
+    {
+        <button class="btn btn-primary" @onclick="SaveChangesHandler">Save Changes</button>
+    }
+    else
+    {
+        <button class="btn btn-primary" @onclick="CreateGoalHandler">Create Goal</button>
+    }
 }
 
-<Modal @ref="Modal" editGoalDay="modalGoalDay" isInEdit="isModalInEditMode" OnCreateButtonClicked="createGoalDay" OnDeleteButtonClicked="deleteGoalDay" OnGoalDayChanged="Refresh" OnValueChanged="recalculate"></Modal>
+    <Modal @ref="Modal" editGoalDay="modalGoalDay" isInEdit="isModalInEditMode" OnCreateButtonClicked="createGoalDay" OnDeleteButtonClicked="deleteGoalDay" OnGoalDayChanged="Refresh" OnValueChanged="recalculate"></Modal>
 
 
-@code {
+
+    @code {
 
 
-    private bool isCalendarVisible { get; set; } = false;
+private bool isCalendarVisible { get; set; } = false;
+
+    [Parameter]
+    public bool isInEdit { get; set; }
 
     [Parameter]
     public Goal goal { get; set; } = null;
@@ -98,8 +109,12 @@
 
     public async void CreateGoalHandler()
     {
-
         await GoalService.AddGoal(goal);
+    }
+
+    public async void SaveChangesHandler()
+    {
+        await GoalService.EditGoal(goal);
     }
 
 
@@ -245,7 +260,7 @@
 
     protected override void OnParametersSet()
     {
-        if(goal == null)
+        if (goal == null)
         {
             return;
         }
@@ -256,4 +271,4 @@
         base.OnParametersSet();
         Refresh();
     }
-}
+    }

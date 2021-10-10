@@ -1,18 +1,20 @@
 ﻿@page "/dashboard"
 @inject IGoalService GoalService
+@inject IToastService ToastService
+@inject NavigationManager NavigationManager
 @attribute [Authorize]
 
 <h3>Dashboard</h3>
 
 
-@if (GoalService.Goals.Count > 0 )
+@if (GoalService.Goals.Count > 0)
 {
     <table class="table">
         @foreach (var goal in GoalService.Goals)
         {
             <tr>
-                <td>
-                    @goal.Name
+                <td style="cursor: pointer;">
+                    <a @onclick="()=>SelectGoal(goal)">@goal.Name</a>
                 </td>
             </tr>
         }
@@ -31,6 +33,14 @@ else
 
         await GoalService.LoadGoals();
 
+    }
+
+    public void SelectGoal(Goal goal)
+    {
+        GoalService.CurrentGoal = goal;
+        GoalService.LoadGoalDays();
+        NavigationManager.NavigateTo("currentgoal");
+        ToastService.ShowSuccess(goal.Id.ToString());
     }
 
 }
