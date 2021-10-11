@@ -39,7 +39,7 @@ namespace BlazorBattles.Client.Services
             {
                 _toastService.ShowSuccess(await result.Content.ReadAsStringAsync());
             }
-            Goals.Add(goal);
+            //Goals.Add(goal);
         }
 
         public async Task EditGoal(Goal goal)

@@ -40,6 +40,7 @@ else
         GoalService.CurrentGoal = goal;
         await GoalService.LoadGoalDays();
         //Console.WriteLine("select goal,number of days: " + GoalService.CurrentGoal.Days.Count.ToString());
+        
         NavigationManager.NavigateTo("currentgoal");
         ToastService.ShowSuccess(goal.Id.ToString());
     }

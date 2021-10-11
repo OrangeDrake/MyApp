@@ -26,8 +26,16 @@
                         <InputNumber id="value" @bind-Value="tempGoalDay.Value" class="form-control"></InputNumber>
 
                         <InputRadioGroup id="recalculate" @bind-Value="recalculateMode" class="form-control">
-                            <InputRadio Value="0" /><span>Redistribute Value increase/decrease to other Dayes</span><br />
-                            <InputRadio Value="1" /><span>Increase/decrease Goal Total Value</span>
+                            @if (isInEdit)
+                            {
+                                <InputRadio Value="0" /><span>Decrease/Icrease values in other days</span><br />
+                                <InputRadio Value="1" /><span>Increase/decrease goal total value</span>
+                            }
+                            else
+                            {
+                                <InputRadio Value="0" /><span>Decrease values in other days</span><br />
+                                <InputRadio Value="1" /><span>Increace goal total value</span>
+                            }
                         </InputRadioGroup>
                     </div>
 
@@ -52,13 +60,30 @@
                 @if (isInEdit)
                 {
                     <button type="button" class="btn btn-primary" @onclick="() => SaveGoalDay()">Save changes</button>
-                    <button type="button" class="btn btn-danger" @onclick="() => Remove()">Remove day</button>
+                    <button type="button" class="btn btn-danger" @onclick="() => ShowRemoveDialog()">Remove day</button>
                 }
                 else
                 {
                     <button type="button" class="btn btn-primary" @onclick="() =>  SaveGoalDay()">Add day</button>
                 }
                 <button type="button" class="btn btn-secondary" data-dismiss="modal" @onclick="() => Close()">Close</button>
+            </div>
+            <div class="modal-footer">
+                @if (isRemoveDialogVisible)
+                {
+                    <EditForm Model="tempGoalDay">
+
+                        <div class="form-group">
+                            <InputRadioGroup id="recalculate" @bind-Value="recalculateMode" class="form-control">
+                                <InputRadio Value="0" /><span>Incease values in other days</span><br />
+                                <InputRadio Value="1" /><span>Decreace goal total value</span>
+                            </InputRadioGroup>
+                        </div>
+                    </EditForm>
+
+                    <button type="button" class="btn btn-danger" @onclick="() => Remove()">Realy Remove day</button>
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal" @onclick="() => HideRemoveDialog()">Don't remove day</button>
+                }
             </div>
         </div>
     </div>
@@ -87,6 +112,8 @@
     public EventCallback OnGoalDayChanged { get; set; }
     [Parameter]
     public EventCallback<int> OnValueChanged { get; set; }
+
+    private bool isRemoveDialogVisible = false;
 
     public int recalculateMode { get; set; }
 
@@ -160,9 +187,21 @@
 
     }
 
+    private void HideRemoveDialog()
+    {
+        isRemoveDialogVisible = false;
+    }
+
+    private void ShowRemoveDialog()
+    {
+        isRemoveDialogVisible = true;
+    }
+
+
     private async void Remove()
     {
         await OnDeleteButtonClicked.InvokeAsync();
+        await OnValueChanged.InvokeAsync(recalculateMode);
         Close();
     }
 
@@ -189,6 +228,7 @@
         tempGoalDay.Value = editGoalDay.Value;
 
         recalculateMode = 0;
+        isRemoveDialogVisible = false;
     }
 
 
