@@ -35,10 +35,11 @@ else
 
     }
 
-    public void SelectGoal(Goal goal)
+    public async void SelectGoal(Goal goal)
     {
         GoalService.CurrentGoal = goal;
-        GoalService.LoadGoalDays();
+        await GoalService.LoadGoalDays();
+        //Console.WriteLine("select goal,number of days: " + GoalService.CurrentGoal.Days.Count.ToString());
         NavigationManager.NavigateTo("currentgoal");
         ToastService.ShowSuccess(goal.Id.ToString());
     }

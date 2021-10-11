@@ -7,6 +7,7 @@ using System.Net.Http;
 using System.Net.Http.Json;
 using System.Threading.Tasks;
 
+
 namespace BlazorBattles.Client.Services
 {
     public class GoalService : IGoalService
@@ -68,8 +69,8 @@ namespace BlazorBattles.Client.Services
         }
         public async Task LoadGoalDays()
         {    
-                CurrentGoal.Days = new List<GoalDay>(await _http.GetFromJsonAsync<IList<GoalDay>>($"api/goal/days/{CurrentGoal.Id}"));
-     
+            CurrentGoal.Days = new List<GoalDay>(await _http.GetFromJsonAsync<IList<GoalDay>>($"api/goal/days/{CurrentGoal.Id}"));
+            //Console.WriteLine( "goal service,number of days: "  + CurrentGoal.Days.Count.ToString());
 
         }
 
