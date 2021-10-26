@@ -17,6 +17,8 @@ namespace BlazorBattles.Shared
 
         public int Value { get; set; }
 
+        public DateTime CheckedDate { get; set; }
+
         public int CompareTo(GoalDay other)
         {
             // A null value means that this object is greater.
@@ -26,5 +28,6 @@ namespace BlazorBattles.Shared
             else
                 return this.StartDate.CompareTo(other.StartDate);
         }
+        
     }
 }
