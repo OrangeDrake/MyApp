@@ -17,7 +17,7 @@ namespace BlazorBattles.Shared
 
         public int Value { get; set; }
 
-        public DateTime CheckedDate { get; set; }
+        public int? CheckedValue { get; set; }
 
         public int CompareTo(GoalDay other)
         {

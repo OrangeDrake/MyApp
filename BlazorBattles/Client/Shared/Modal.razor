@@ -156,11 +156,14 @@
     {
         bool recalculateValue = false;
 
-        if (tempGoalDay.Note != String.Empty)
+        if (editGoalDay.Note == String.Empty)
+        {
+            editGoalDay.Note = null;
+        }
+        else
         {
             editGoalDay.Note = (String)tempGoalDay.Note.Clone();
         }
-
         editGoalDay.StartDate = tempGoalDay.StartDate;
         editGoalDay.LengthTime = tempGoalDay.LengthTime;
         editGoalDay.IsAllDay = tempGoalDay.IsAllDay;

@@ -1,0 +1,127 @@
+﻿<div class="modal @ModalClass" tabindex="-1" role="dialog" style="display:@ModalDisplay">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    <span>Check Day</span>
+
+                    <span>@(checkGoalDay.StartDate)</span>
+                </h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <p>Modal body text goes here.</p>
+                <EditForm Model="tempGoalDay">
+                    <div>
+                        Na tento den bylo naplanovano @checkGoalDay.Value
+                    </div>
+                    <div class="form-group">
+                        <label for="value">Value</label>
+                        <InputNumber id="value" @bind-Value="tempGoalDay.CheckedValue" class="form-control"></InputNumber>
+                    </div>
+                    <div class="form-group">
+                        <label for="note">Note</label>
+                        <InputTextArea id="note" @bind-Value="tempGoalDay.Note" class="form-control"></InputTextArea>
+
+                    </div>
+                </EditForm>
+            </div>
+            <div class="modal-footer">
+
+                <button type="button" class="btn btn-primary" @onclick="() =>  CheckGoalDay()">Check day</button>
+                <button type="button" class="btn btn-secondary" data-dismiss="modal" @onclick="() => Close()">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+
+@if (ShowBackdrop)
+{
+    <div class="modal-backdrop fade show"></div>
+}
+
+
+@code {
+
+    [Parameter]
+    public GoalDay checkGoalDay { get; set; }
+    [Parameter]
+    public EventCallback OnGoalDayChanged { get; set; }
+
+    public GoalDay tempGoalDay { get; set; }
+
+    public Guid Guid = Guid.NewGuid();
+    public string ModalDisplay = "none;";
+    public string ModalClass = "";
+    public bool ShowBackdrop = false;
+
+
+
+    private async void CheckGoalDay()
+    {
+        if (checkGoalDay.Note == String.Empty)
+        {
+            checkGoalDay.Note = null;
+        }
+        else 
+        {
+            checkGoalDay.Note = (String)tempGoalDay.Note.Clone();
+        }
+
+        checkGoalDay.CheckedValue = tempGoalDay.CheckedValue;
+
+        await OnGoalDayChanged.InvokeAsync();
+
+        Close();
+
+    }
+
+
+    protected override void OnParametersSet()
+    {
+
+        base.OnParametersSet();
+
+        tempGoalDay = new GoalDay();
+
+        if (checkGoalDay.Note == null)
+        {
+            tempGoalDay.Note = String.Empty;
+        }
+        else
+        {
+            tempGoalDay.Note = (String)checkGoalDay.Note.Clone();
+        }
+
+        //tempGoalDay.StartDate = checkGoalDay.StartDate;
+        //tempGoalDay.LengthTime = checkGoalDay.LengthTime; //mozna smazat
+        //tempGoalDay.IsAllDay = checkGoalDay.IsAllDay;//mozna smazat
+        //tempGoalDay.Value = checkGoalDay.Value;
+        tempGoalDay.CheckedValue = checkGoalDay.CheckedValue;
+    }
+
+
+    public void Open()
+    {
+        ModalDisplay = "block;";
+        ModalClass = "Show";
+        ShowBackdrop = true;
+
+        StateHasChanged();
+    }
+
+
+    public void Close()
+    {
+        ModalDisplay = "none";
+        ModalClass = "";
+        ShowBackdrop = false;
+
+        StateHasChanged();
+    }
+}
