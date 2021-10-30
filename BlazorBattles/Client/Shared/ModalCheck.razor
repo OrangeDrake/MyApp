@@ -15,7 +15,7 @@
                 <p>Modal body text goes here.</p>
                 <EditForm Model="tempGoalDay">
                     <div>
-                        Na tento den bylo naplanovano @checkGoalDay.Value
+                        To his day was planned @checkGoalDay.Value . By this day the total achived value should be @checkCumulativeValue .
                     </div>
                     <div class="form-group">
                         <label for="value">Value</label>
@@ -52,6 +52,8 @@
     public GoalDay checkGoalDay { get; set; }
     [Parameter]
     public EventCallback OnGoalDayChanged { get; set; }
+    [Parameter]
+    public int checkCumulativeValue { get; set; }
 
     public GoalDay tempGoalDay { get; set; }
 
@@ -68,7 +70,7 @@
         {
             checkGoalDay.Note = null;
         }
-        else 
+        else
         {
             checkGoalDay.Note = (String)tempGoalDay.Note.Clone();
         }

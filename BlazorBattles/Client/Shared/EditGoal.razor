@@ -11,6 +11,7 @@
     currentCalendarDay = firstCalendarDay;
     dayIndex = 0;
     lastPrintedMonth = -1;
+    cumulativeValue = 0;
 
     <table class="table" style="max-width : 1000px">
         <thead>
@@ -45,12 +46,15 @@
                         else
                         {
                             DateTime cellCalendarDay = currentCalendarDay;
+                            Tuple<string, int> styleAndCumulativeValue = GetStyleCumulativeValueAndDecideIfIsDayInGoal(currentCalendarDay);
+                            String currentCellStyle = styleAndCumulativeValue.Item1;
+                            int currentCellCumulativeValue = styleAndCumulativeValue.Item2;
 
-                            <td style="@GetStyleAndDecideIfIsDayInGoal(currentCalendarDay)" @onclick="() => CellClicked(cellCalendarDay)">
+                            <td style=@currentCellStyle @onclick="() => CellClicked(cellCalendarDay,currentCellCumulativeValue)">
                                 <span>@currentCalendarDay.ToString("dd"). </span>
                                 @if (isDayInGoal)
                                 {
-                                    <span style="background-color: navajowhite">@currentGoalDay.Value @goal.Unit </span>
+                                    <span style="background-color: navajowhite">@currentGoalDay.Value/@cumulativeValue @goal.Unit </span>
                                     @if (!currentGoalDay.IsAllDay)
                                     {
                                         <br /><span style="font-weight: 300; font-style : italic; align-self : center">@currentGoalDay.StartDate.ToString("HH:mm") - @((currentGoalDay.StartDate + currentGoalDay.LengthTime).ToString("HH:mm"))</span>
@@ -84,7 +88,7 @@
 }
 
 <Modal @ref="Modal" editGoalDay="modalGoalDay" isInEdit="isModalInEditMode" OnCreateButtonClicked="createGoalDay" OnDeleteButtonClicked="deleteGoalDay" OnGoalDayChanged="Refresh" OnValueChanged="recalculate"></Modal>
-<ModalCheck @ref="ModalCheck" checkGoalDay="modalGoalDay" OnGoalDayChanged="Refresh"></ModalCheck>
+<ModalCheck @ref="ModalCheck" checkGoalDay="modalGoalDay" checkCumulativeValue="modalCumulativeValue" OnGoalDayChanged="Refresh"></ModalCheck>
 
 
 @code {
@@ -98,218 +102,224 @@
     [Parameter]
     public Goal goal { get; set; } = null;
 
-    private bool isCalendarVisible { get; set; } = false;
-    private DateTime currentCalendarDay { get; set; }
+private bool isCalendarVisible { get; set; } = false;
+private DateTime currentCalendarDay { get; set; }
 
-    private DateTime firstCalendarDay { get; set; }
-    private DateTime startCalendarDay { get; set; }
-    private DateTime endCalendarDay { get; set; }
+private DateTime firstCalendarDay { get; set; }
+private DateTime startCalendarDay { get; set; }
+private DateTime endCalendarDay { get; set; }
 
-    private GoalDay currentGoalDay { get; set; } = null;
-    private bool isDayInGoal { get; set; }
+private GoalDay currentGoalDay { get; set; } = null;
+private bool isDayInGoal { get; set; }
 
-    private int lastPrintedMonth = -1;
-    int dayIndex = 0;
+int cumulativeValue = 0;
+int modalCumulativeValue = 0;
 
-    private Modal Modal { get; set; }
-    private ModalCheck ModalCheck { get; set; }
+private int lastPrintedMonth = -1;
+int dayIndex = 0;
 
-    private GoalDay modalGoalDay { get; set; } = new GoalDay();
-    public bool isModalInEditMode { get; set; }
+private Modal Modal { get; set; }
+private ModalCheck ModalCheck { get; set; }
 
-    public async void CreateGoalHandler()
+private GoalDay modalGoalDay { get; set; } = new GoalDay();
+public bool isModalInEditMode { get; set; }
+
+public async void CreateGoalHandler()
+{
+    await GoalService.AddGoal(goal);
+}
+
+public async void SaveChangesHandler()
+{
+    await GoalService.EditGoal(goal);
+}
+
+
+private Tuple<string, int> GetStyleCumulativeValueAndDecideIfIsDayInGoal(DateTime currentCalendarDay)
+{
+    if (dayIndex == goal.Days.Count)
     {
-        await GoalService.AddGoal(goal);
-    }
-
-    public async void SaveChangesHandler()
-    {
-        await GoalService.EditGoal(goal);
-    }
-
-
-    private string GetStyleAndDecideIfIsDayInGoal(DateTime currentCalendarDay)
-    {
-        if (dayIndex == goal.Days.Count)
-        {
-            isDayInGoal = false;
-            if (isInCheck)
-            {
-                return "color: grey; font - weight: 200; ";
-            }
-            else
-            {
-                return "border: 2px dashed black; font-weight: 400;cursor: pointer;";
-            }
-        }
-
-        currentGoalDay = goal.Days.ElementAt(dayIndex);
-        //Console.WriteLine("note:" + currentGoalDay.Note);
-
-        if (currentGoalDay.StartDate.Date == currentCalendarDay.Date)
-        {
-            isDayInGoal = true;
-            dayIndex++;
-
-            if (isInCheck)
-            {
-                return "border: 1px solid black; background-color: Orange; font-weight: 600; cursor: pointer;";
-            }
-            else
-            {
-                return "border: 2px solid black; background-color: PaleGreen; font-weight: 600; cursor: pointer;";
-            }
-        }
-
         isDayInGoal = false;
         if (isInCheck)
         {
-            return "color: grey; font - weight: 200; ";
+            return new Tuple<string, int>("color: grey; font - weight: 200; ", cumulativeValue);
         }
         else
         {
-            return "border: 2px dashed black; font-weight: 400;cursor: pointer;";
+            return new Tuple<string, int>("border: 2px dashed black; font-weight: 400;cursor: pointer;", cumulativeValue);
         }
     }
 
+    currentGoalDay = goal.Days.ElementAt(dayIndex);
+    //Console.WriteLine("note:" + currentGoalDay.Note);
 
-    private void CellClicked(DateTime currentDay)
+    if (currentGoalDay.StartDate.Date == currentCalendarDay.Date)
     {
-        GoalDay tempGoalDay = goal.Days.FirstOrDefault(goalDay => goalDay.StartDate.Date.Equals(currentDay.Date));
-        if (tempGoalDay != null && isInCheck)
-        {
-            modalGoalDay = tempGoalDay;
-            isModalInEditMode = true;
-            ModalCheck.Open();
-        }
-        else if (tempGoalDay != null && !isInCheck)
-        {
-            modalGoalDay = tempGoalDay;
-            isModalInEditMode = true;
-            Modal.Open();
-        }
-        else if(!isInCheck)
-        {
-            TimeSpan genetaredTime = goal.StartDateGenerated.TimeOfDay;
-            modalGoalDay = new GoalDay { IsAllDay = goal.IsAllDayGenerated, StartDate = currentDay.Date + genetaredTime, LengthTime = goal.LengthTimeGenerated };
-            isModalInEditMode = false;
-            Modal.Open();
-        }
+        cumulativeValue += currentGoalDay.Value;
+        isDayInGoal = true;
+        dayIndex++;
 
+        if (isInCheck)
+        {
+            return new Tuple<string, int>("border: 1px solid black; background-color: Orange; font-weight: 600; cursor: pointer;", cumulativeValue);
+        }
+        else
+        {
+            return new Tuple<string, int>("border: 2px solid black; background-color: PaleGreen; font-weight: 600; cursor: pointer;", cumulativeValue);
+        }
     }
 
-
-    private void recalculate(int recalculateMode)
+    isDayInGoal = false;
+    if (isInCheck)
     {
-        if (recalculateMode == 0)
-        {
-            DistributeTotalValueToDays(modalGoalDay);
-        }
-        else if (recalculateMode == 1)
-        {
-            RecalcutateTotalValue();
-        }
+        return new Tuple<string, int>("color: grey; font - weight: 200; ", cumulativeValue);
     }
-
-
-    private void DistributeTotalValueToDays(GoalDay excludedday)
+    else
     {
-        int totalValue = goal.TotalValue;
-        int daysCount = goal.Days.Count;
+        return new Tuple<string, int>("border: 2px dashed black; font-weight: 400;cursor: pointer;", cumulativeValue);
+    }
+}
 
-        if (excludedday != null && goal.Days.Contains(excludedday)) // when removing day, day is already not is list
+
+private void CellClicked(DateTime currentDay, int currentCellcumulativeValue)
+{
+    GoalDay tempGoalDay = goal.Days.FirstOrDefault(goalDay => goalDay.StartDate.Date.Equals(currentDay.Date));
+    if (tempGoalDay != null && isInCheck)
+    {
+        Console.WriteLine("cumulativeValue: " + cumulativeValue);
+        modalCumulativeValue = currentCellcumulativeValue;
+        modalGoalDay = tempGoalDay;
+        isModalInEditMode = true;
+        ModalCheck.Open();
+    }
+    else if (tempGoalDay != null && !isInCheck)
+    {
+        modalGoalDay = tempGoalDay;
+        isModalInEditMode = true;
+        Modal.Open();
+    }
+    else if (!isInCheck)
+    {
+        TimeSpan genetaredTime = goal.StartDateGenerated.TimeOfDay;
+        modalGoalDay = new GoalDay { IsAllDay = goal.IsAllDayGenerated, StartDate = currentDay.Date + genetaredTime, LengthTime = goal.LengthTimeGenerated };
+        isModalInEditMode = false;
+        Modal.Open();
+    }
+
+}
+
+
+private void recalculate(int recalculateMode)
+{
+    if (recalculateMode == 0)
+    {
+        DistributeTotalValueToDays(modalGoalDay);
+    }
+    else if (recalculateMode == 1)
+    {
+        RecalcutateTotalValue();
+    }
+}
+
+
+private void DistributeTotalValueToDays(GoalDay excludedday)
+{
+    int totalValue = goal.TotalValue;
+    int daysCount = goal.Days.Count;
+
+    if (excludedday != null && goal.Days.Contains(excludedday)) // when removing day, day is already not is list
+    {
+        totalValue -= excludedday.Value;
+
+        daysCount--;
+
+
+    }
+
+    int Value = totalValue / daysCount;
+    int RestofValue = totalValue % daysCount;
+
+    foreach (GoalDay day in goal.Days)
+    {
+        if (day != excludedday)
         {
-            totalValue -= excludedday.Value;
-
-            daysCount--;
-
-
+            day.Value = Value;
         }
-
-        int Value = totalValue / daysCount;
-        int RestofValue = totalValue % daysCount;
-
-        foreach (GoalDay day in goal.Days)
+    }
+    int i = 0;
+    while (RestofValue > 0)
+    {
+        if (goal.Days[i] != excludedday)
         {
-            if (day != excludedday)
-            {
-                day.Value = Value;
-            }
+            goal.Days[i].Value++;
+            RestofValue--;
         }
-        int i = 0;
-        while (RestofValue > 0)
-        {
-            if (goal.Days[i] != excludedday)
-            {
-                goal.Days[i].Value++;
-                RestofValue--;
-            }
-            i++;
-        }
+        i++;
     }
+}
 
 
-    private void RecalcutateTotalValue()
+private void RecalcutateTotalValue()
+{
+    int totalValue = 0;
+
+    foreach (GoalDay day in goal.Days)
     {
-        int totalValue = 0;
-
-        foreach (GoalDay day in goal.Days)
-        {
-            totalValue += day.Value;
-        }
-
-        goal.TotalValue = totalValue;
+        totalValue += day.Value;
     }
 
+    goal.TotalValue = totalValue;
+}
 
 
-    private void createGoalDay()
+
+private void createGoalDay()
+{
+    goal.Days.Add(modalGoalDay);
+    goal.Days.Sort();
+}
+
+
+private void deleteGoalDay()
+{
+    goal.Days.Remove(modalGoalDay);
+}
+
+
+private void Refresh()
+{
+    //InitializeCalendar();
+    StateHasChanged();
+}
+
+
+public void InitializeCalendar()
+{
+    startCalendarDay = goal.Days.ElementAt(0).StartDate;
+
+    var startDayNumber = (int)startCalendarDay.DayOfWeek;
+    startDayNumber = startDayNumber == 0 ? 7 : startDayNumber;
+
+    firstCalendarDay = startCalendarDay.AddDays(-startDayNumber + 1);
+    endCalendarDay = goal.Days.ElementAt(goal.Days.Count - 1).StartDate;
+
+    currentCalendarDay = firstCalendarDay;
+    dayIndex = 0;
+    lastPrintedMonth = -1;
+}
+
+
+protected override void OnParametersSet()
+{
+    if (goal == null)
     {
-        goal.Days.Add(modalGoalDay);
-        goal.Days.Sort();
+        return;
     }
 
-
-    private void deleteGoalDay()
-    {
-        goal.Days.Remove(modalGoalDay);
-    }
-
-
-    private void Refresh()
-    {
-        //InitializeCalendar();
-        StateHasChanged();
-    }
-
-
-    public void InitializeCalendar()
-    {
-        startCalendarDay = goal.Days.ElementAt(0).StartDate;
-
-        var startDayNumber = (int)startCalendarDay.DayOfWeek;
-        startDayNumber = startDayNumber == 0 ? 7 : startDayNumber;
-
-        firstCalendarDay = startCalendarDay.AddDays(-startDayNumber + 1);
-        endCalendarDay = goal.Days.ElementAt(goal.Days.Count - 1).StartDate;
-
-        currentCalendarDay = firstCalendarDay;
-        dayIndex = 0;
-        lastPrintedMonth = -1;
-    }
-
-
-    protected override void OnParametersSet()
-    {
-        if (goal == null)
-        {
-            return;
-        }
-
-        InitializeCalendar();
-        isCalendarVisible = true;
-        DistributeTotalValueToDays(null);
-        base.OnParametersSet();
-        Refresh();
-    }
+    InitializeCalendar();
+    isCalendarVisible = true;
+    DistributeTotalValueToDays(null);
+    base.OnParametersSet();
+    Refresh();
+}
 }
