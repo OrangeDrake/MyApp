@@ -40,6 +40,28 @@ namespace BlazorBattles.Server.Controllers
         }
 
 
+        [HttpPut("day")]
+        public async Task<IActionResult> CheckGoalDay(GoalDay goalDay)
+        {
+            var checkGoalDay = await _context.GoalDays.FirstOrDefaultAsync(goalDayDatabase => goalDayDatabase.Id == goalDay.Id);
+
+            if (goalDay.Note == String.Empty)
+            {
+                goalDay.Note = null;
+            }
+            else
+            {
+                checkGoalDay.Note = (String)goalDay.Note.Clone();
+            }
+
+            checkGoalDay.CheckedValue = goalDay.CheckedValue;
+
+            await _context.SaveChangesAsync();
+
+            return Ok("Goal progress checked: " + goalDay.CheckedValue);
+        }
+        
+
         [HttpPut]
         public async Task<IActionResult> EditeGoal(Goal goal)
         {

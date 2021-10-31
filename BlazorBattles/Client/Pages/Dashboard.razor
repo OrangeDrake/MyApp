@@ -28,10 +28,13 @@ else
 
 
 @code {
-    protected override async Task OnInitializedAsync()
+    //protected override async Task OnInitializedAsync()
+    //protected async override Task OnAfterRenderAsync(bool firstRender)
+    protected override async Task OnParametersSetAsync()
     {
 
         await GoalService.LoadGoals();
+        //StateHasChanged();
 
     }
 
@@ -40,7 +43,7 @@ else
         GoalService.CurrentGoal = goal;
         await GoalService.LoadGoalDays();
         //Console.WriteLine("select goal,number of days: " + GoalService.CurrentGoal.Days.Count.ToString());
-        
+
         NavigationManager.NavigateTo("currentgoal");
         ToastService.ShowSuccess(goal.Id.ToString());
     }

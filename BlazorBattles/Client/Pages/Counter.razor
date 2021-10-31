@@ -1,8 +1,39 @@
 ﻿@page "/counter"
+@inject IJSRuntime JSRuntime;
 
 <h1>Counter</h1>
 
 <p>Current count: @currentCount</p>
+<div style="max-width:500px">
+    <canvas id="myChart" width="400" height="400"></canvas>
+</div>
 
-<button class="btn btn-primary" @onclick="IncrementCount">Click me</button>
+
+<button style="margin:4px;" class="btn btn-primary" @onclick="CallJSMethos2">Click me</button>
+
+@code{
+
+    List<int> cisla = new List<int> { 12, 19, 3, 1000, 2, 3 };
+
+    private async Task CallJSMethos()
+    {
+        await JSRuntime.InvokeVoidAsync("drawExampleChart");
+    }
+
+    private async Task CallJSMethos2()
+    {
+        await JSRuntime.InvokeVoidAsync("drawChart", cisla);
+    }
+    /*
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            await CallJSMethos();
+        }
+    }
+    */
+}
+
+
 

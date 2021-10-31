@@ -15,6 +15,8 @@ namespace BlazorBattles.Client.Services
         public Task LoadGoals();
         public Task LoadGoalDays();
 
+        public Task CheckGoalDay(GoalDay goalDay);
+
 
     }
 }

@@ -59,7 +59,7 @@
             <div class="modal-footer">
                 @if (isInEdit)
                 {
-                    <button type="button" class="btn btn-primary" @onclick="() => SaveGoalDay()">Save changes</button>
+                    <button type="button" class="btn btn-primary" @onclick="() => SaveGoalDay()">Confirm changes</button>
                     <button type="button" class="btn btn-danger" @onclick="() => ShowRemoveDialog()">Remove day</button>
                 }
                 else
@@ -152,11 +152,11 @@
         }
     }
 
-    private async void SaveGoalDay()
+    private async void SaveGoalDay()// confirm changes of confirm creation of new day, but not yet uplade changes to database
     {
         bool recalculateValue = false;
 
-        if (editGoalDay.Note == String.Empty)
+        if (tempGoalDay.Note == String.Empty)
         {
             editGoalDay.Note = null;
         }
