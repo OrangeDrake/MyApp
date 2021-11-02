@@ -53,19 +53,20 @@
                             String currentCellStyle = styleAndCumulativeValue.Item1;
                             int currentCellCumulativeValue = styleAndCumulativeValue.Item2;
 
-                            <td style=@currentCellStyle @onclick="() => CellClicked(cellCalendarDay,currentCellCumulativeValue)">
-                                <span>@currentCalendarDay.ToString("dd"). </span>
-                                @if (isDayInGoal)
-                                {
-                                    <span style="background-color: navajowhite">@currentGoalDay.Value/@cumulativeValue @goal.Unit </span>
-                                    @if (!currentGoalDay.IsAllDay)
-                                    {
-                                        <br /><span style="font-weight: 300; font-style : italic; align-self : center">@currentGoalDay.StartDate.ToString("HH:mm") - @((currentGoalDay.StartDate + currentGoalDay.LengthTime).ToString("HH:mm"))</span>
-                                    }
-                                }
-                                <div class="note">@currentGoalDay.Note</div>
-                                <div class="note">@currentGoalDay.CheckedValue</div>
-                            </td>
+                <td style=@currentCellStyle @onclick="() => CellClicked(cellCalendarDay,currentCellCumulativeValue)">
+                    <span>@currentCalendarDay.ToString("dd"). </span>
+                    @if (isDayInGoal)
+                    {
+                        <span style="background-color: navajowhite">@currentGoalDay.Value/@cumulativeValue @goal.Unit </span>
+                        @if (!currentGoalDay.IsAllDay)
+                        {
+                            <br /><span style="font-weight: 300; font-style : italic; align-self : center">@currentGoalDay.StartDate.ToString("HH:mm") - @((currentGoalDay.StartDate + currentGoalDay.LengthTime).ToString("HH:mm"))</span>
+                        }
+                        <div class="note">@currentGoalDay.Note</div>
+                        <div class="note">@currentGoalDay.CheckedValue</div>
+                    }
+
+                </td>
 
                         }
                         currentCalendarDay = currentCalendarDay.AddDays(1);
@@ -93,8 +94,8 @@
     }
     else
     {
-        <div style="max-width:1000px">
-            <canvas id="myChart" width="400" height="400"></canvas>
+        <div id="graph-container" style="max-width:1000px">
+            <canvas id="myChart" ></canvas>
         </div>
 
     }
@@ -126,6 +127,7 @@
     private GoalDay currentGoalDay { get; set; } = null;
     private bool isDayInGoal { get; set; }
 
+    int? lastCheckedValue = 0;
     int cumulativeValue = 0;
     int modalCumulativeValue = 0;
 
@@ -139,13 +141,14 @@
     public bool isModalInEditMode { get; set; }
 
     List<int> cumulativeValues = new List<int>();
+    List<int?> checkedValues = new List<int?>();
     List<String> dates = new List<String>();
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
         if (firstRender && isInCheck)
         {
-            await JSRuntime.InvokeVoidAsync("drawChart", dates, cumulativeValues);
+            await JSRuntime.InvokeVoidAsync("drawChart", dates, cumulativeValues, checkedValues);
         }
     }
 
@@ -173,12 +176,14 @@
             isDayInGoal = false;
             if (isInCheck)
             {
+                checkedValues.Add(lastCheckedValue);
                 cumulativeValues.Add(cumulativeValue);
                 return new Tuple<string, int>
                 ("color: grey; font - weight: 200; ", cumulativeValue);
             }
             else
             {
+                checkedValues.Add(lastCheckedValue);
                 cumulativeValues.Add(cumulativeValue);
                 return new Tuple<string, int>
                 ("border: 2px dashed black; font-weight: 400;cursor: pointer;", cumulativeValue);
@@ -196,12 +201,18 @@
 
             if (isInCheck)
             {
+                if (currentGoalDay.CheckedValue != null)
+                {
+                    lastCheckedValue = currentGoalDay.CheckedValue;
+                }
+                checkedValues.Add(lastCheckedValue);
                 cumulativeValues.Add(cumulativeValue);
                 return new Tuple<string, int>
                     ("border: 1px solid black; background-color: Orange; font-weight: 600; cursor: pointer;", cumulativeValue);
             }
             else
             {
+                checkedValues.Add(lastCheckedValue);
                 cumulativeValues.Add(cumulativeValue);
                 return new Tuple<string, int>
                 ("border: 2px solid black; background-color: PaleGreen; font-weight: 600; cursor: pointer;", cumulativeValue);
@@ -211,12 +222,14 @@
         isDayInGoal = false;
         if (isInCheck)
         {
+            checkedValues.Add(lastCheckedValue);
             cumulativeValues.Add(cumulativeValue);
             return new Tuple<string, int>
             ("color: grey; font - weight: 200; ", cumulativeValue);
         }
         else
         {
+            checkedValues.Add(lastCheckedValue);
             cumulativeValues.Add(cumulativeValue);
             return new Tuple<string, int>
             ("border: 2px dashed black; font-weight: 400;cursor: pointer;", cumulativeValue);
@@ -328,9 +341,21 @@
     }
 
 
-    private void Refresh()
+    private async Task Refresh()
     {
-        //InitializeCalendar();
+        Console.WriteLine("****refresh");
+        //InitializeCalendar();        
+        if (isInCheck)
+        {
+            lastCheckedValue = 0;
+            cumulativeValue = 0;
+            cumulativeValues = new List<int>();
+            checkedValues = new List<int?>();
+            dates = new List<String>();
+
+            await JSRuntime.InvokeVoidAsync("destroyChart");
+            await JSRuntime.InvokeVoidAsync("drawChart", dates, cumulativeValues, checkedValues);
+        }
         StateHasChanged();
     }
 

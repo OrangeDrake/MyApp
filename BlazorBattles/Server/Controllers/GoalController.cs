@@ -45,7 +45,7 @@ namespace BlazorBattles.Server.Controllers
         {
             var checkGoalDay = await _context.GoalDays.FirstOrDefaultAsync(goalDayDatabase => goalDayDatabase.Id == goalDay.Id);
 
-            if (goalDay.Note == String.Empty)
+            if (goalDay.Note == null)
             {
                 goalDay.Note = null;
             }
