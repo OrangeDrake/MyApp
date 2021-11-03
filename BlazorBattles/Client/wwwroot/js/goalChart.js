@@ -16,6 +16,7 @@ function destroyChart() {
     var newCanvas = document.createElement("canvas");
     newCanvas.setAttribute("id", "myChart");
     canvas_container.append(newCanvas);
+
 }
 
 
@@ -43,7 +44,7 @@ function drawChart(dates, cumulativeValues, checkedValues) {
                 borderColor: "#8e5ea2",
                 fill: {
                     target: 'origin',
-                    
+
                     below: 'rgb(0, 0, 255)'    // And blue below the origin
                 }
 

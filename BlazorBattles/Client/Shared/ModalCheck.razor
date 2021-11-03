@@ -33,7 +33,7 @@
             </div>
             <div class="modal-footer">
 
-                <button type="button" class="btn btn-primary" @onclick="() =>  CheckGoalDay()">Check day</button>
+                <button type="button" class="btn btn-primary" @onclick="() =>  CheckGoal()">Check day</button>
                 <button type="button" class="btn btn-secondary" data-dismiss="modal" @onclick="() => Close()">Close</button>
             </div>
         </div>
@@ -67,7 +67,7 @@
 
 
 
-    private async void CheckGoalDay()
+    private async void CheckGoal()
     {
         if (tempGoalDay.Note == String.Empty)
         {
@@ -81,7 +81,7 @@
         checkGoalDay.CheckedValue = tempGoalDay.CheckedValue;
 
         await GoalService.CheckGoalDay(checkGoalDay);
-        OnGoalDayChanged.InvokeAsync();
+        await OnGoalDayChanged.InvokeAsync();
 
 
         Close();

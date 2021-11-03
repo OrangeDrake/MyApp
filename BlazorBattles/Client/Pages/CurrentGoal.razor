@@ -5,12 +5,29 @@
 
 <h3>CurrentGoal</h3>
 
-<EditGoal @ref="editGoal" goal="GoalService.CurrentGoal" isInCheck="true" isInEdit="true"></EditGoal>
+<EditGoal @ref="editGoal" goal="GoalService.CurrentGoal" isInCheck="@isInCheckSwitch" isInEdit="true"></EditGoal>
+
+<button class="btn btn-primary" @onclick="showGoalEdit">Edit Goal</button>
+
+<!--
+<div id="divCheckbox" hidden="@isEditHidden">
+    <EditGoal @ref="editGoal" goal="GoalService.CurrentGoal" isInCheck="false" isInEdit="true"></EditGoal>
+</div>
+-->
 
 @code {
 
     private EditGoal editGoal { get; set; }
     public Goal goal { get; set; }
+    //private bool isEditHidden { get; set; } = true;
+    public bool isInCheckSwitch { get; set; } = true;
+
+    private void showGoalEdit()
+    {
+        //isEditHidden = false;
+        isInCheckSwitch = false;
+
+    }
 
 }
 
