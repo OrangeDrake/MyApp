@@ -65,12 +65,14 @@ namespace BlazorBattles.Server.Controllers
         [HttpPut]
         public async Task<IActionResult> EditeGoal(Goal goal)
         {
-            var user = await _utilityService.GetUser();
-            goal.UserId = user.Id;
+            //var user = await _utilityService.GetUser();
+            //goal.UserId = user.Id;
 
-            _context.Goals.Add(goal);
+            var modifyGoal = await _context.Goals.FirstOrDefaultAsync(modifyGoal => modifyGoal.Id == goal.Id);            
+            modifyGoal.Days = goal.Days;
+            modifyGoal.Name = "Zmena";
             await _context.SaveChangesAsync();
-            return Ok("Goal added days:" + goal.Days.Count);
+            return Ok("Goal modified days:" + goal.Days.Count);
             {
 
             }

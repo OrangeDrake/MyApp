@@ -98,7 +98,7 @@
 <br />
 
 
-<EditGoal @ref="editGoal" goal="goal" isInEdit="false" isInCheck="false"></EditGoal>
+<EditGoal @ref="editGoal" goal="goal" isInEdit="false" isInCheck="false" onSaveChanges="stub"></EditGoal>
 
 
 @code {
@@ -119,6 +119,9 @@
 
     private EditContext editContext;
 
+    private void stub() {
+    
+    }
 
     private bool IsTimeVisible
     {
@@ -239,17 +242,18 @@
         }
 
         int Value = totalGoalBuilder.TotalValue / goal.Days.Count;
-        int RestofValue = totalGoalBuilder.TotalValue % goal.Days.Count;        
+        int RestofValue = totalGoalBuilder.TotalValue % goal.Days.Count;
     }
-   
+
 
     private void LoadPreviousPlan()
     {
         Goal tempGoal = goal;
         goal = previousGoal;
         previousGoal = tempGoal;
-        editGoal.InitializeCalendar();
+        //editGoal.InitializeCalendar();
     }
+
 
 }
 

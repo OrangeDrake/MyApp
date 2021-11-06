@@ -206,15 +206,13 @@
     {
         await OnDeleteButtonClicked.InvokeAsync();
         await OnValueChanged.InvokeAsync(recalculateMode);
+        await OnGoalDayChanged.InvokeAsync();
         Close();
     }
 
 
     protected override void OnParametersSet()
     {
-
-        base.OnParametersSet();
-
         tempGoalDay = new GoalDay();
 
         if (editGoalDay.Note == null)

@@ -5,7 +5,7 @@
 
 <h3>CurrentGoal</h3>
 
-<EditGoal @ref="editGoal" goal="GoalService.CurrentGoal" isInCheck="@isInCheckSwitch" isInEdit="true"></EditGoal>
+    <EditGoal @ref="editGoal" goal="GoalService.CurrentGoal" isInCheck="@isInCheckSwitch" isInEdit="true" onSaveChanges="showGoalCheck"></EditGoal>
 
 <button class="btn btn-primary" @onclick="showGoalEdit">Edit Goal</button>
 
@@ -29,5 +29,9 @@
 
     }
 
+    private void showGoalCheck()
+    {
+        isInCheckSwitch = true;
+    }
 }
 

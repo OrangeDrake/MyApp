@@ -16,6 +16,11 @@
     lastPrintedMonth = -1;
     cumulativeValue = 0;
 
+    lastCheckedValue = 0;
+    cumulativeValues = new List<int>();
+    checkedValues = new List<int?>();
+    dates = new List<String>();
+
     <table class="table" style="max-width : 1000px">
         <thead>
             <tr>
@@ -97,7 +102,6 @@
         <canvas id="myChart"></canvas>
     </div>
 
-
 }
 
 <Modal @ref="Modal" editGoalDay="modalGoalDay" isInEdit="isModalInEditMode" OnCreateButtonClicked="createGoalDay" OnDeleteButtonClicked="deleteGoalDay" OnGoalDayChanged="Refresh" OnValueChanged="recalculate"></Modal>
@@ -114,6 +118,10 @@
     public bool isInEdit { get; set; }
     [Parameter]
     public Goal goal { get; set; } = null;
+    [Parameter]
+    public EventCallback onSaveChanges { get; set; }
+
+    // Goal originalGoal { get; set; }
 
     private bool isCalendarVisible { get; set; } = false;
     private DateTime currentCalendarDay { get; set; }
@@ -142,14 +150,30 @@
     List<int?> checkedValues = new List<int?>();
     List<String> dates = new List<String>();
 
+
+
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
-        if (firstRender)
+        if (goal == null)
+        {
+            return;
+        }
+
+        if (!isInEdit)
+        {
+            await JSRuntime.InvokeVoidAsync("drawChart", dates, cumulativeValues, null);
+        }
+
+        await JSRuntime.InvokeVoidAsync("drawChart", dates, cumulativeValues, checkedValues);
+
+        /*
+        if (firstRender && goal != null)
+        //if(firstRender)
         {
             await JSRuntime.InvokeVoidAsync("drawChart", dates, cumulativeValues, checkedValues);
-            firstRender = false;
+
         }
-        /*
+
         else if (firstRenderAfterEdit)
         {
 
@@ -159,8 +183,6 @@
         */
 
     }
-
-
 
 
     public async void CreateGoalHandler()
@@ -174,13 +196,15 @@
     public async void SaveChangesHandler()
     {
         await GoalService.EditGoal(goal);
+        await onSaveChanges.InvokeAsync();
+
     }
 
 
     private Tuple<string, int>
     GetStyleCumulativeValueAndDecideIfIsDayInGoal(DateTime currentCalendarDay)
     {
-        dates.Add(currentCalendarDay.Date.ToShortDateString()); 
+        dates.Add(currentCalendarDay.Date.ToShortDateString());
         if (dayIndex == goal.Days.Count)
         {
             checkedValues.Add(lastCheckedValue); // mozna je navic
@@ -356,17 +380,9 @@
         //InitializeCalendar();
         //if (isInCheck)
         //{
-        lastCheckedValue = 0;
-        cumulativeValue = 0;
-        cumulativeValues = new List<int>
-            ();
-        checkedValues = new List<int?>
-            ();
-        dates = new List<String>
-            ();
 
-        await JSRuntime.InvokeVoidAsync("destroyChart");
-        await JSRuntime.InvokeVoidAsync("drawChart", dates, cumulativeValues, checkedValues);
+        //await JSRuntime.InvokeVoidAsync("destroyChart");
+        //await JSRuntime.InvokeVoidAsync("drawChart", dates, cumulativeValues, checkedValues);
         // }
         StateHasChanged();
     }
@@ -397,10 +413,25 @@
             return;
         }
 
+        /*
+        if (isInEdit && !isInCheck)
+        {
+        //originalGoal = goal.
+
+
+        base.OnParametersSet();
+
+        }
+        */
+
         InitializeCalendar();
         isCalendarVisible = true;
         DistributeTotalValueToDays(null);
         base.OnParametersSet();
+        //await JSRuntime.InvokeVoidAsync("destroyChart");
+        //await JSRuntime.InvokeVoidAsync("drawChart", dates, cumulativeValues, checkedValues);
+        //Refresh()
         //await Refresh();
+
     }
 }

@@ -1,3 +1,7 @@
+
+var myChart = null;
+
+
 function destroyChart() {
     /*
     const ctx = document.getElementById('myChart').getContext('2d');
@@ -28,9 +32,13 @@ function drawChart(dates, cumulativeValues, checkedValues) {
     }
     */
 
+    if (myChart != null) {
+        myChart.destroy();
+    }
+
     const ctx = document.getElementById('myChart').getContext('2d');
 
-    var myChart = new Chart(ctx, {
+    myChart = new Chart(ctx, {
         type: 'line',
         data: {
             labels: dates,
@@ -58,5 +66,12 @@ function drawChart(dates, cumulativeValues, checkedValues) {
             }
         }
     });
+    /*
+    if (checkedValues == null) {
+        myChart.data.datasets.splice(0, 1);
+        myChart.update();
+    }
+    */
+    
 
 }
