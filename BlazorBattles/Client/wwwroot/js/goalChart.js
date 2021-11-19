@@ -1,6 +1,7 @@
 
 var myChart = null;
-
+//counter = 0;
+//counterDraw = 0;
 
 function destroyChart() {
     /*
@@ -24,7 +25,7 @@ function destroyChart() {
 }
 
 
-function drawChart(dates, cumulativeValues, checkedValues) {
+function drawChart(dates, cumulativeValues) {
 
     /*
     if (myChart != null) {
@@ -32,7 +33,7 @@ function drawChart(dates, cumulativeValues, checkedValues) {
     }
     */
 
-    if (myChart != null) {
+    if (myChart != null) {        
         myChart.destroy();
     }
 
@@ -43,10 +44,12 @@ function drawChart(dates, cumulativeValues, checkedValues) {
         data: {
             labels: dates,
             datasets: [{
-                label: 'Planed Value',
+                label: 'Planed Total Value',
                 data: cumulativeValues,
                 borderColor: "#3e95cd",
-            }, {
+            } /*,
+               
+                {
                 label: 'Checked Value',
                 data: checkedValues,
                 borderColor: "#8e5ea2",
@@ -55,8 +58,9 @@ function drawChart(dates, cumulativeValues, checkedValues) {
 
                     below: 'rgb(0, 0, 255)'    // And blue below the origin
                 }
-
-            }]
+            
+            }*/
+        ]
         },
         options: {
             scales: {
@@ -65,13 +69,32 @@ function drawChart(dates, cumulativeValues, checkedValues) {
                 }
             }
         }
-    });
-    /*
+    });   /*
     if (checkedValues == null) {
         myChart.data.datasets.splice(0, 1);
         myChart.update();
     }
     */
-    
 
+    //alert("draw counter " + counterDraw++);
+    checkeadded = false;
+}
+
+function addCheckedValues(checkedValues) {
+
+    if (!checkeadded) { // for some reason InvokeVoidAsync in OnAfterRenderAsync method in EditGoal.rasor is called twice, each row separately is called twice!
+        myChart.data.datasets.push({
+            label: 'Checked Total Value',
+            borderColor: "#8e5ea2",
+            data: checkedValues,
+            fill: {
+                target: 'origin',
+
+                below: 'rgb(0, 0, 255)'
+            }// And blue below the origin
+        });
+        myChart.update();
+        //alert(counter++);
+        checkeadded = true;
+    }
 }

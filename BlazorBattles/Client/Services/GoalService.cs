@@ -73,7 +73,7 @@ namespace BlazorBattles.Client.Services
         }
         public async Task LoadGoalDays()
         {    
-            CurrentGoal.Days = new List<GoalDay>(await _http.GetFromJsonAsync<IList<GoalDay>>($"api/goal/days/{CurrentGoal.Id}"));
+            CurrentGoal.Days = new List<GoalDay>(await _http.GetFromJsonAsync<IList<GoalDay>>($"api/goal/days/{CurrentGoal.Id}")).OrderBy(goalDay=>goalDay.StartDate).ToList();
             //Console.WriteLine( "goal service,number of days: "  + CurrentGoal.Days.Count.ToString());
 
         }

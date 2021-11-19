@@ -81,10 +81,10 @@
         checkGoalDay.CheckedValue = tempGoalDay.CheckedValue;
 
         await GoalService.CheckGoalDay(checkGoalDay);
-        await OnGoalDayChanged.InvokeAsync();
-
 
         Close();
+
+        await OnGoalDayChanged.InvokeAsync();
 
     }
 

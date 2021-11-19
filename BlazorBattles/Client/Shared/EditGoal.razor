@@ -111,15 +111,15 @@
 @code {
 
 
-    [Parameter]
-    public bool isInCheck { get; set; }
+        [Parameter]
+        public bool isInCheck { get; set; }
 
-    [Parameter]
-    public bool isInEdit { get; set; }
-    [Parameter]
-    public Goal goal { get; set; } = null;
-    [Parameter]
-    public EventCallback onSaveChanges { get; set; }
+        [Parameter]
+        public bool isInEdit { get; set; }
+        [Parameter]
+        public Goal goal { get; set; } = null;
+        [Parameter]
+        public EventCallback onSaveChanges { get; set; }
 
     // Goal originalGoal { get; set; }
 
@@ -161,10 +161,15 @@
 
         if (!isInEdit)
         {
-            await JSRuntime.InvokeVoidAsync("drawChart", dates, cumulativeValues, null);
+            await JSRuntime.InvokeVoidAsync("drawChart", dates, cumulativeValues);
+        }
+        else
+        {
+            await JSRuntime.InvokeVoidAsync("drawChart", dates, cumulativeValues);
+            await JSRuntime.InvokeVoidAsync("addCheckedValues", checkedValues);
         }
 
-        await JSRuntime.InvokeVoidAsync("drawChart", dates, cumulativeValues, checkedValues);
+
 
         /*
         if (firstRender && goal != null)
