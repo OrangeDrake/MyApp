@@ -4,10 +4,19 @@
 @attribute [Authorize]
 
 <h3>CurrentGoal</h3>
+@if (isInCheckSwitch)
+{
+    <button class="btn btn-light" @onclick="showGoalEdit">[Edit Goal]</button>
+}
+else
+{
+    <button class="btn btn-light" @onclick="showGoalCheck">[Close Edit]</button>
+}
 
-    <EditGoal @ref="editGoal" goal="GoalService.CurrentGoal" isInCheck="@isInCheckSwitch" isInEdit="true" onSaveChanges="showGoalCheck"></EditGoal>
+<br />
+<EditGoal @ref="editGoal" goal="GoalService.CurrentGoal" isInCheck="@isInCheckSwitch" isInEdit="true"  onCloseChanges="showGoalCheck"></EditGoal>
 
-<button class="btn btn-primary" @onclick="showGoalEdit">Edit Goal</button>
+
 
 <!--
 <div id="divCheckbox" hidden="@isEditHidden">

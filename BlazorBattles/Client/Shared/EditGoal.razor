@@ -20,6 +20,8 @@
     cumulativeValues = new List<int>();
     checkedValues = new List<int?>();
     dates = new List<String>();
+    int i = 0;
+
 
     <table class="table" style="max-width : 1000px">
         <thead>
@@ -62,6 +64,7 @@
                                 <span>@currentCalendarDay.ToString("dd"). </span>
                                 @if (isDayInGoal)
                                 {
+
                                     <span style="background-color: navajowhite">@currentGoalDay.Value/@cumulativeValue @goal.Unit </span>
                                     @if (!currentGoalDay.IsAllDay)
                                     {
@@ -69,6 +72,15 @@
                                     }
                                     <div class="note">@currentGoalDay.Note</div>
                                     <div class="note">@currentGoalDay.CheckedValue</div>
+                                }
+
+                                @if (isDayInGoal)
+                                {
+                                    int iCopy = i;
+                                    i++;
+
+                                    <input type="checkbox" checked=@checkboxesChecked[iCopy]
+                                           @onchange="eventArgs => { CheckboxClicked(iCopy, eventArgs.Value); }" /> <br />
                                 }
 
                             </td>
@@ -81,12 +93,14 @@
             }
         </tbody>
     </table>
+
     <br />
     @if (!isInCheck)
     {
         @if (isInEdit)
         {
             <button class="btn btn-primary" @onclick="SaveChangesHandler">Save Changes</button>
+            <button class="btn btn-secondary" @onclick="CloseChangesHandler">Close Changes</button>
         }
         else
         {
@@ -111,15 +125,15 @@
 @code {
 
 
-        [Parameter]
-        public bool isInCheck { get; set; }
+    [Parameter]
+    public bool isInCheck { get; set; }
 
-        [Parameter]
-        public bool isInEdit { get; set; }
-        [Parameter]
-        public Goal goal { get; set; } = null;
-        [Parameter]
-        public EventCallback onSaveChanges { get; set; }
+    [Parameter]
+    public bool isInEdit { get; set; }
+    [Parameter]
+    public Goal goal { get; set; } = null;
+    [Parameter]
+    public EventCallback onCloseChanges { get; set; }
 
     // Goal originalGoal { get; set; }
 
@@ -149,8 +163,29 @@
     List<int> cumulativeValues = new List<int>();
     List<int?> checkedValues = new List<int?>();
     List<String> dates = new List<String>();
+    
+    bool[] checkboxesChecked;
 
 
+    public void CheckboxClicked(int i, object aChecked)
+    {
+        if ((bool)aChecked)
+        {
+            checkboxesChecked[i] = true;
+        }
+        else
+        {
+            checkboxesChecked[i] = false;
+        }
+
+        StateHasChanged();
+    }
+
+
+    private void editMultiple()
+    {
+
+    }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
@@ -201,8 +236,13 @@
     public async void SaveChangesHandler()
     {
         await GoalService.EditGoal(goal);
-        await onSaveChanges.InvokeAsync();
+        await onCloseChanges.InvokeAsync();
 
+    }
+
+    public async void CloseChangesHandler()
+    {
+        onCloseChanges.InvokeAsync();
     }
 
 
@@ -370,12 +410,41 @@
     {
         goal.Days.Add(modalGoalDay);
         goal.Days.Sort();
+        int indexNewDay = goal.Days.IndexOf(modalGoalDay); //checkboxesChecked array has to be increased by 1 element, index of new Goal Day is saved
+
+        bool[] checkboxesCheckedTemp = new bool[checkboxesChecked.Length + 1];
+        int j = 0;
+        for (int i = 0; i < checkboxesChecked.Length; i++)
+        {
+            if (i == indexNewDay) // when index of newly created Goal day index is encountered false value is assing to at and index of newly created array is also increased
+            {
+                checkboxesCheckedTemp[j++] = false;
+
+            }
+            checkboxesCheckedTemp[j++] = checkboxesChecked[i]; // in same passage (no else here!!) value is also copyed from original array, so j is increaed twice, new array is inceased by 1 so it matches
+        }
+        checkboxesChecked = checkboxesCheckedTemp;
+
     }
 
 
     private void deleteGoalDay()
     {
+        int indexDeleteDay = goal.Days.IndexOf(modalGoalDay); //checkboxesChecked array has to be decreased by 1 element, index of deleted Goal Day is saved
         goal.Days.Remove(modalGoalDay);
+
+        bool[] checkboxesCheckedTemp = new bool[checkboxesChecked.Length - 1];
+        int j = 0;
+        for (int i = 0; i < checkboxesChecked.Length; i++)
+        {
+            if (i == indexDeleteDay) // when index of newly created Goal day index is encountered assigning values is skipped, j index is not incresed in this passage
+            {
+                continue;
+
+            }
+            checkboxesCheckedTemp[j++] = checkboxesChecked[i]; // in same passage (no else here!!) value is also copyed from original array, so j is increaed twice, new array is inceased by 1 so it matches
+        }
+        checkboxesChecked = checkboxesCheckedTemp;
     }
 
 
@@ -429,6 +498,7 @@
         }
         */
 
+        checkboxesChecked = new bool[goal.Days.Count];
         InitializeCalendar();
         isCalendarVisible = true;
         DistributeTotalValueToDays(null);
