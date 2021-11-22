@@ -3,6 +3,7 @@ var myChart = null;
 //counter = 0;
 //counterDraw = 0;
 
+
 function destroyChart() {
     /*
     const ctx = document.getElementById('myChart').getContext('2d');
@@ -27,13 +28,14 @@ function destroyChart() {
 
 function drawChart(dates, cumulativeValues) {
 
+
     /*
     if (myChart != null) {
         myChart.destroy();
     }
     */
 
-    if (myChart != null) {        
+    if (myChart != null) {
         myChart.destroy();
     }
 
@@ -60,13 +62,17 @@ function drawChart(dates, cumulativeValues) {
                 }
             
             }*/
-        ]
+            ]
         },
         options: {
             scales: {
                 y: {
                     beginAtZero: true
+
                 }
+            },
+            animation: {
+                duration: 0
             }
         }
     });   /*

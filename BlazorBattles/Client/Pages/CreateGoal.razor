@@ -120,7 +120,7 @@
     private EditContext editContext;
 
     private void stub() {
-    
+
     }
 
     private bool IsTimeVisible
@@ -223,13 +223,14 @@
         TimeSpan.TryParseExact(totalGoalBuilder.StartTime, "hh\\:mm\\:ss", null, out StartTime);
         TimeSpan.TryParseExact(totalGoalBuilder.LengthTime, "hh\\:mm\\:ss", null, out LocalLenght);
 
+        currentCalendarDay = totalGoalBuilder.StartDate;
+
         goal.IsAllDayGenerated = totalGoalBuilder.IsAllDay;
         goal.StartDateGenerated = currentCalendarDay + StartTime;
         goal.LengthTimeGenerated = LocalLenght;
         goal.TotalValue = totalGoalBuilder.TotalValue;
         goal.Unit = totalGoalBuilder.Unit;
 
-        currentCalendarDay = totalGoalBuilder.StartDate;
 
         while (currentCalendarDay <= totalGoalBuilder.EndDate)
         {
