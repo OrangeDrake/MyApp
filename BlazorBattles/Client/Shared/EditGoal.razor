@@ -144,15 +144,15 @@
 @code {
 
 
-        [Parameter]
-        public bool isInCheck { get; set; }
+    [Parameter]
+    public bool isInCheck { get; set; }
 
-        [Parameter]
-        public bool isInEdit { get; set; }
-        [Parameter]
-        public Goal goal { get; set; } = null;
-        [Parameter]
-        public EventCallback onCloseChanges { get; set; }
+    [Parameter]
+    public bool isInEdit { get; set; }
+    [Parameter]
+    public Goal goal { get; set; } = null;
+    [Parameter]
+    public EventCallback onCloseChanges { get; set; }
 
     // Goal originalGoal { get; set; }
 
@@ -397,7 +397,7 @@
             copyDayValuesToSelectedDays();//value have to be copied from edited temp day to all selected dayas
             if (recalculateMode == 0)
             {
-                //DistributeTotalValueToDaysMultiple(modalGoalDay);
+                DistributeTotalValueToDaysMultiple();
             }
             else if (recalculateMode == 1)
             {
@@ -457,10 +457,46 @@
         {
             if (goal.Days[i] != excludedDay)
             {
-                goal.Days[i].Value++;
+                goal.Days[i++].Value++;
                 RestofValue--;
             }
-            i++;
+        }
+    }
+
+    private void DistributeTotalValueToDaysMultiple()
+    {
+        int totalValue = goal.TotalValue;
+        int daysCount = goal.Days.Count;
+
+        int j = 0;
+        foreach (GoalDay day in goal.Days)
+        {
+            if (checkboxesChecked[j++])// change from method DistributeTotalValueToDays is are not focusing on excluded day instead it we have checkboxesChecked array
+            {
+                totalValue -= day.Value;
+                daysCount--;
+            }
+        }
+
+        int Value = totalValue / daysCount;
+        int RestofValue = totalValue % daysCount;
+        j = 0;
+        foreach (GoalDay day in goal.Days)
+        {
+            if (!checkboxesChecked[j++])
+            {
+                day.Value = Value;
+            }
+        }
+
+        j = 0;
+        while (RestofValue > 0)
+        {
+            if (!checkboxesChecked[j])
+            {
+                goal.Days[j++].Value++;
+                RestofValue--;
+            }
         }
     }
 
@@ -503,21 +539,55 @@
 
     private void deleteGoalDay()
     {
-        int indexDeleteDay = goal.Days.IndexOf(modalGoalDay); //checkboxesChecked array has to be decreased by 1 element, index of deleted Goal Day is saved
-        goal.Days.Remove(modalGoalDay);
-
-        bool[] checkboxesCheckedTemp = new bool[checkboxesChecked.Length - 1];
-        int j = 0;
-        for (int i = 0; i < checkboxesChecked.Length; i++)
+        int j;
+        if (!isInEditMultiple)
         {
-            if (i == indexDeleteDay) // when index of newly created Goal day index is encountered assigning values is skipped, j index is not incresed in this passage
-            {
-                continue;
+            int indexDeleteDay = goal.Days.IndexOf(modalGoalDay); //checkboxesChecked array has to be decreased by 1 element, index of deleted Goal Day is saved
+            goal.Days.Remove(modalGoalDay);
 
+            bool[] checkboxesCheckedTemp = new bool[checkboxesChecked.Length - 1];
+            j = 0;
+            for (int i = 0; i < checkboxesChecked.Length; i++)
+            {
+                if (i == indexDeleteDay) // when index of newly created Goal day index is encountered assigning values is skipped, j index is not incresed in this passage
+                {
+                    continue;
+                }
+                checkboxesCheckedTemp[j++] = checkboxesChecked[i]; // in same passage (no else here!!) value is also copyed from original array, so j is increaed twice, new array is inceased by 1 so it matches
             }
-            checkboxesCheckedTemp[j++] = checkboxesChecked[i]; // in same passage (no else here!!) value is also copyed from original array, so j is increaed twice, new array is inceased by 1 so it matches
+            checkboxesChecked = checkboxesCheckedTemp;
         }
-        checkboxesChecked = checkboxesCheckedTemp;
+
+        else
+        {
+            j = 0;
+            int numberOfRemoveDays = 0;
+            foreach (GoalDay day in goal.Days)
+            {
+                if (checkboxesChecked[j++])
+                {
+                    numberOfRemoveDays--;
+                }
+            }
+
+            bool[] checkboxesCheckedTemp = new bool[checkboxesChecked.Length - numberOfRemoveDays];
+
+            j = 0;
+            numberOfRemoveDays = 0;
+            for (int i = 0; i < checkboxesChecked.Length; i++)
+            {
+                if (checkboxesChecked[i])
+                {
+                    goal.Days.RemoveAt(i - numberOfRemoveDays);
+                    numberOfRemoveDays++;
+                    continue;
+
+                }
+                checkboxesCheckedTemp[j++] = checkboxesChecked[i];
+            }
+            checkboxesChecked = checkboxesCheckedTemp;
+        }
+
     }
 
 
