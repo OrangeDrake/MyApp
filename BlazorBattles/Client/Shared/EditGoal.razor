@@ -137,7 +137,7 @@
 
 }
 
-<Modal @ref="Modal" editGoalDay="modalGoalDay" isInEdit="isModalInEditMode" OnCreateButtonClicked="createGoalDay" OnDeleteButtonClicked="deleteGoalDay" OnGoalDayChanged="Refresh" OnValueChanged="recalculate"></Modal>
+<Modal @ref="Modal" editGoalDay="modalGoalDay" isInEdit="isModalInEditMode" OnCreateButtonClicked="createGoalDay" OnDeleteButtonClicked="deleteGoalDay" OnGoalDayChanged="Refresh" OnValueChanged="@((args)=> recalculate(args.Item1,args.Item2))"></Modal>
 <ModalCheck @ref="ModalCheck" checkGoalDay="modalGoalDay" checkCumulativeValue="modalCumulativeValue" OnGoalDayChanged="Refresh"></ModalCheck>
 
 
@@ -266,7 +266,7 @@
 
     public async void CloseChangesHandler()
     {
-        onCloseChanges.InvokeAsync();
+        await onCloseChanges.InvokeAsync();
     }
 
 
@@ -379,31 +379,44 @@
     }
 
 
-    private void recalculate(int recalculateMode)
+    private void recalculate(int recalculateMode, int valueChange)
     {
         if (!isInEditMultiple) //single day editing
         {
             if (recalculateMode == 0)
             {
-                DistributeTotalValueToDays(modalGoalDay);
+                DistributeValueChangeToDays(modalGoalDay, valueChange);
             }
             else if (recalculateMode == 1)
             {
-                RecalcutateTotalValue();
+                RecalcutateTotalValue(valueChange);
             }
         }
         else // multiple days recalculation
         {
-            copyDayValuesToSelectedDays();//value have to be copied from edited temp day to all selected dayas
             if (recalculateMode == 0)
             {
-                DistributeTotalValueToDaysMultiple();
+                DistributeValueChangeToDaysMultiple(-valueChange);
             }
             else if (recalculateMode == 1)
             {
-                RecalcutateTotalValue(); // same function as for editing single day
+                RecalcutateTotalValueMultiple(); // same function as for editing single day
             }
         }
+    }
+
+
+    private void RecalcutateTotalValueMultiple()
+    {
+        copyDayValuesToSelectedDays();//value have to be copied from edited temp day to all selected dayas
+        int totalValue = 0;
+
+        foreach (GoalDay day in goal.Days)
+        {
+            totalValue += day.Value;
+        }
+
+        goal.TotalValue = totalValue;
     }
 
     private void copyDayValuesToSelectedDays()
@@ -428,28 +441,25 @@
         }
     }
 
-    private void DistributeTotalValueToDays(GoalDay excludedDay)
+    private void DistributeValueChangeToDays(GoalDay excludedDay, int valueChange)
     {
-        int totalValue = goal.TotalValue;
-        int daysCount = goal.Days.Count;
 
-        if (excludedDay != null && goal.Days.Contains(excludedDay)) // when removing day, day is already not is list
+        int valueChangeMultiplier = 1;
+        int daysCount = goal.Days.Count - 1; // we dont count excluded day
+
+        int Value = valueChange / daysCount;
+        if (valueChange < 0)
         {
-            totalValue -= excludedDay.Value;
-
-            daysCount--;
-
-
+            valueChange *= -1;
+            valueChangeMultiplier = -1;
         }
-
-        int Value = totalValue / daysCount;
-        int RestofValue = totalValue % daysCount;
+        int RestofValue = valueChange % daysCount;
 
         foreach (GoalDay day in goal.Days)
         {
             if (day != excludedDay)
             {
-                day.Value = Value;
+                day.Value += Value;
             }
         }
         int i = 0;
@@ -457,60 +467,70 @@
         {
             if (goal.Days[i] != excludedDay)
             {
-                goal.Days[i++].Value++;
+                goal.Days[i].Value += valueChangeMultiplier;
                 RestofValue--;
             }
+            i++;
         }
     }
 
-    private void DistributeTotalValueToDaysMultiple()
+    private void DistributeValueChangeToDaysMultiple(int valueChangeFromZero) //Bude se hodne menit
     {
-        int totalValue = goal.TotalValue;
+        int valueChangeMultiplier = 1;
+
+        int valueChange = 0;
         int daysCount = goal.Days.Count;
 
-        int j = 0;
+        int i = 0;
         foreach (GoalDay day in goal.Days)
         {
-            if (checkboxesChecked[j++])// change from method DistributeTotalValueToDays is are not focusing on excluded day instead it we have checkboxesChecked array
+            if (checkboxesChecked[i])// change from method DistributeTotalValueToDays is are not focusing on excluded day instead it we have checkboxesChecked array
             {
-                totalValue -= day.Value;
+                valueChange +=  day.Value - valueChangeFromZero;
                 daysCount--;
             }
+            i++;
         }
 
-        int Value = totalValue / daysCount;
-        int RestofValue = totalValue % daysCount;
-        j = 0;
+        int Value = valueChange / daysCount;
+
+        if (valueChange < 0)
+        {
+            valueChange *= -1; // for modulo, valueChange with real sign is already used in preceding division
+            valueChangeMultiplier = -1;
+        }
+
+        int RestofValue = valueChange % daysCount;
+
+        i = 0;
         foreach (GoalDay day in goal.Days)
         {
-            if (!checkboxesChecked[j++])
+            if (!checkboxesChecked[i])
             {
-                day.Value = Value;
+                goal.Days[i].Value += Value;
             }
+            i++;
         }
 
-        j = 0;
+        i = 0;
         while (RestofValue > 0)
         {
-            if (!checkboxesChecked[j])
+            if (!checkboxesChecked[i])
             {
-                goal.Days[j++].Value++;
+                goal.Days[i].Value += valueChangeMultiplier;
                 RestofValue--;
             }
+            i++;
         }
+
+        copyDayValuesToSelectedDays();//value have to be copied from edited temp day to all selected dayas
     }
 
 
-    private void RecalcutateTotalValue()
+    private void RecalcutateTotalValue(int valueChanege)
     {
-        int totalValue = 0;
+        goal.TotalValue -= valueChanege;
 
-        foreach (GoalDay day in goal.Days)
-        {
-            totalValue += day.Value;
-        }
-
-        goal.TotalValue = totalValue;
     }
 
 
@@ -591,7 +611,7 @@
     }
 
 
-    private async Task Refresh()
+    private void Refresh()
     {
         Console.WriteLine("****refresh");
         //InitializeCalendar();
@@ -644,7 +664,7 @@
         checkboxesChecked = new bool[goal.Days.Count];
         InitializeCalendar();
         isCalendarVisible = true;
-        DistributeTotalValueToDays(null);
+        //DistributeTotalValueToDays(null,goal.TotalValue);
         base.OnParametersSet();
         //await JSRuntime.InvokeVoidAsync("destroyChart");
         //await JSRuntime.InvokeVoidAsync("drawChart", dates, cumulativeValues, checkedValues);

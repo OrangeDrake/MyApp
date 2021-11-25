@@ -202,7 +202,6 @@
                 daysAreDisabled = false;
             }
         }
-
     }
 
 
@@ -231,7 +230,6 @@
         goal.TotalValue = totalGoalBuilder.TotalValue;
         goal.Unit = totalGoalBuilder.Unit;
 
-
         while (currentCalendarDay <= totalGoalBuilder.EndDate)
         {
             PropertyInfo pinfo = typeof(GoalBuilder).GetProperty(currentCalendarDay.DayOfWeek.ToString());
@@ -242,8 +240,29 @@
             currentCalendarDay = currentCalendarDay.AddDays(1);
         }
 
-        int Value = totalGoalBuilder.TotalValue / goal.Days.Count;
-        int RestofValue = totalGoalBuilder.TotalValue % goal.Days.Count;
+        DistributeTotalValueToDays(goal);
+    }
+
+
+    private void DistributeTotalValueToDays(Goal goal)
+    {
+        int totalValue = goal.TotalValue;
+        int daysCount = goal.Days.Count;
+
+        int Value = totalValue / daysCount;
+        int RestofValue = totalValue % daysCount;
+
+        foreach (GoalDay day in goal.Days)
+        {
+            day.Value = Value;
+        }
+
+        int i = 0;
+        while (RestofValue > 0)
+        {
+            goal.Days[i++].Value++;
+            RestofValue--;
+        }
     }
 
 
