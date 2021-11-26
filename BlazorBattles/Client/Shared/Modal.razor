@@ -35,7 +35,7 @@
                         <label for="value">Value</label>
                         @if (isInEditingMultiple)
                         {
-                            <snap style="font-style:italic"> Edit</snap>
+                            <snap style="font-style:italic"> Should be Edited</snap>
                             <InputCheckbox @bind-Value=modifyValue></InputCheckbox><br />
                         }
                         @if (modifyValue)
@@ -58,19 +58,38 @@
                         }
                     </div>
 
+
                     <div class="form-group">
                         <label for="showTime">All Day</label>
-                        <InputCheckbox id="showTime" @bind-Value="tempGoalDay.IsAllDay" class="form-checked"></InputCheckbox>
-                        <br />
-                        @if (!tempGoalDay.IsAllDay)
+
+                        @if (isInEditingMultiple)
                         {
-                            <span>Starting Time </span><InputText type="time" @bind-Value="@StartDateProxy" />
-                            <span>Length of session </span><InputText type="time" @bind-Value="@LengthTimeProxy" />
+                            <snap style="font-style:italic"> Should be Edited</snap>
+                            <InputCheckbox @bind-Value=modifyDuration></InputCheckbox><br />
+                        }
+
+                        @if (modifyDuration)
+                        {
+                            <InputCheckbox id="showTime" @bind-Value="tempGoalDay.IsAllDay" class="form-checked"></InputCheckbox>
+                            <br />
+                            @if (!tempGoalDay.IsAllDay)
+                            {
+                                <span>Starting Time </span><InputText type="time" @bind-Value="@StartDateProxy" />
+                                <span>Length of session </span><InputText type="time" @bind-Value="@LengthTimeProxy" />
+                            }
                         }
                     </div>
                     <div class="form-group">
                         <label for="note">Note</label>
-                        <InputTextArea id="note" @bind-Value="tempGoalDay.Note" class="form-control"></InputTextArea>
+                        @if (isInEditingMultiple)
+                        {
+                            <snap style="font-style:italic"> Should be Edited</snap>
+                            <InputCheckbox @bind-Value=modifyNote></InputCheckbox><br />
+                        }
+                        @if (modifyNote)
+                        {
+                            <InputTextArea id="note" @bind-Value="tempGoalDay.Note" class="form-control"></InputTextArea>
+                        }
 
                     </div>
                 </EditForm>
@@ -130,7 +149,7 @@
     [Parameter]
     public EventCallback OnGoalDayChanged { get; set; }
     [Parameter]
-    public EventCallback<(int, int)> OnValueChanged { get; set; }
+    public EventCallback<(int, int, bool, bool)> OnValueChanged { get; set; }
 
     private bool isRemoveDialogVisible = false;
 
@@ -145,6 +164,8 @@
 
     bool isInEditingMultiple;
     bool modifyValue;
+    bool modifyDuration;
+    bool modifyNote;
 
     public string StartDateProxy
     {
@@ -176,6 +197,7 @@
 
     private async void SaveGoalDay()// confirm changes of confirm creation of new day, but not yet uplade changes to database
     {
+
         int valueChange = editGoalDay.Value - tempGoalDay.Value;
 
         if (tempGoalDay.Note == String.Empty)
@@ -186,23 +208,26 @@
         {
             editGoalDay.Note = (String)tempGoalDay.Note.Clone();
         }
-        editGoalDay.StartDate = tempGoalDay.StartDate;
-        editGoalDay.LengthTime = tempGoalDay.LengthTime;
-        editGoalDay.IsAllDay = tempGoalDay.IsAllDay;
+        editGoalDay.StartDate = tempGoalDay.StartDate; // probably not needed
+
+
         editGoalDay.CheckedValue = tempGoalDay.CheckedValue;
 
         editGoalDay.Value = tempGoalDay.Value;
+        editGoalDay.IsAllDay = tempGoalDay.IsAllDay;
+        editGoalDay.LengthTime = tempGoalDay.LengthTime;
 
         if (!isInEdit)
         {
             await OnCreateButtonClicked.InvokeAsync(); // will add goalDay to List
         }
 
-        if (valueChange !=0 || (modifyValue && isInEditingMultiple))
+        if (!modifyValue)
         {
-            await OnValueChanged.InvokeAsync((recalculateMode, valueChange));
+            recalculateMode = -1;
         }
 
+        await OnValueChanged.InvokeAsync((recalculateMode, valueChange,modifyDuration,modifyNote));
         await OnGoalDayChanged.InvokeAsync();
         Close();
 
@@ -221,9 +246,8 @@
 
     private async void Remove()
     {
-        
+        await OnValueChanged.InvokeAsync((recalculateMode, editGoalDay.Value,false,false));
         await OnDeleteButtonClicked.InvokeAsync();
-        await OnValueChanged.InvokeAsync((recalculateMode, -editGoalDay.Value));
         await OnGoalDayChanged.InvokeAsync();
         Close();
     }
@@ -233,6 +257,8 @@
     {
         isInEditingMultiple = editGoalDay.StartDate == new DateTime();
         modifyValue = true;
+        modifyDuration = true;
+        modifyNote = true;
 
         tempGoalDay = new GoalDay();
 
