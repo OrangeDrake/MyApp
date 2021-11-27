@@ -260,6 +260,7 @@
     public async void SaveChangesHandler()
     {
         await GoalService.EditGoal(goal);
+        GoalService.CurrentGoal = GoalService.TempGoal;
         await onCloseChanges.InvokeAsync();
 
     }

@@ -16,6 +16,7 @@ namespace BlazorBattles.Client.Services
         private readonly HttpClient _http;
 
         public Goal CurrentGoal { get; set; }
+        public Goal TempGoal { get; set; }
         public IList<Goal> Goals { get; set; } = new List<Goal>();
         //public IList<GoalDay> GoalDays { get; set; }
 
@@ -58,7 +59,7 @@ namespace BlazorBattles.Client.Services
             {
                 _toastService.ShowSuccess(await result.Content.ReadAsStringAsync());
             }
-            Goals.Add(goal);
+           
         }
 
 

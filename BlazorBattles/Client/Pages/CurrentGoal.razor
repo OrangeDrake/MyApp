@@ -14,7 +14,7 @@ else
 }
 
 <br />
-<EditGoal @ref="editGoal" goal="GoalService.CurrentGoal" isInCheck="@isInCheckSwitch" isInEdit="true"  onCloseChanges="showGoalCheck"></EditGoal>
+<EditGoal @ref="editGoal" goal="@activeGoal" isInCheck="@isInCheckSwitch" isInEdit="true" onCloseChanges="showGoalCheck"></EditGoal>
 
 
 
@@ -26,21 +26,71 @@ else
 
 @code {
 
+
+    public Goal activeGoal { get; set; }
+
     private EditGoal editGoal { get; set; }
     public Goal goal { get; set; }
     //private bool isEditHidden { get; set; } = true;
     public bool isInCheckSwitch { get; set; } = true;
 
+    protected override void OnInitialized()
+    {
+        activeGoal = GoalService.CurrentGoal;
+    }
+
     private void showGoalEdit()
     {
         //isEditHidden = false;
+
+        copyCurrentGoalToTempGoal();
+        activeGoal = GoalService.TempGoal;
         isInCheckSwitch = false;
 
     }
 
     private void showGoalCheck()
     {
+        activeGoal = GoalService.CurrentGoal;
         isInCheckSwitch = true;
     }
+
+    private void copyCurrentGoalToTempGoal()
+    {
+        GoalService.TempGoal = new Goal();
+        GoalService.TempGoal.Id = GoalService.CurrentGoal.Id;
+        GoalService.TempGoal.Name = GoalService.CurrentGoal.Name;
+        GoalService.TempGoal.IsAllDayGenerated = GoalService.CurrentGoal.IsAllDayGenerated;
+        GoalService.TempGoal.LengthTimeGenerated = GoalService.CurrentGoal.LengthTimeGenerated;
+        GoalService.TempGoal.StartDateGenerated = GoalService.CurrentGoal.StartDateGenerated;
+        GoalService.TempGoal.Unit = GoalService.CurrentGoal.Unit;
+        GoalService.TempGoal.UserId = GoalService.CurrentGoal.UserId;
+        GoalService.TempGoal.TotalValue = GoalService.CurrentGoal.TotalValue;
+        GoalService.TempGoal.StartDateGenerated = GoalService.CurrentGoal.StartDateGenerated;
+
+
+        foreach (GoalDay goalDay in GoalService.CurrentGoal.Days)
+        {
+            GoalService.TempGoal.Days.Add(copyCurrentDay(goalDay));
+        }
+
+    }
+
+    private GoalDay copyCurrentDay(GoalDay currentGoalDay)
+    {
+        GoalDay goalDaya = new GoalDay();
+        goalDaya.Id = currentGoalDay.Id;
+        goalDaya.GoalId = currentGoalDay.GoalId;
+        goalDaya.IsAllDay = currentGoalDay.IsAllDay;
+        goalDaya.LengthTime = currentGoalDay.LengthTime;
+        goalDaya.Note = currentGoalDay.Note;
+        goalDaya.StartDate = currentGoalDay.StartDate;
+        goalDaya.Value = currentGoalDay.Value;
+        goalDaya.CheckedValue = currentGoalDay.CheckedValue;
+        return goalDaya;
+
+    }
+
+
 }
 

@@ -60,7 +60,7 @@ namespace BlazorBattles.Server.Controllers
 
             return Ok("Goal progress checked: " + goalDay.CheckedValue);
         }
-        
+
 
         [HttpPut]
         public async Task<IActionResult> EditeGoal(Goal goal)
@@ -68,9 +68,24 @@ namespace BlazorBattles.Server.Controllers
             //var user = await _utilityService.GetUser();
             //goal.UserId = user.Id;
 
-            var modifyGoal = await _context.Goals.FirstOrDefaultAsync(modifyGoal => modifyGoal.Id == goal.Id);            
+            var modifyGoal = await _context.Goals.FirstOrDefaultAsync(modifyGoal => modifyGoal.Id == goal.Id);
+
+
+            var goalDays = _context.GoalDays.Where(goalDay => goalDay.GoalId == goal.Id);
+            _context.RemoveRange(goalDays);
+
+
+            /*
+            var questions = db.QuizWithQuestions
+              .Where(q => deletedQuestions.Contains(q.Id))
+              .Include(q => q.QuizUserAnswers);
+
+        // assuming this is your DbSet
+        db.QuizWithQuestions.RemoveRange(questions);
+*/
+
             modifyGoal.Days = goal.Days;
-            modifyGoal.Name = "Zmena";
+            //modifyGoal.Name = "Zmena2";
             await _context.SaveChangesAsync();
             return Ok("Goal modified days:" + goal.Days.Count);
             {
@@ -87,7 +102,7 @@ namespace BlazorBattles.Server.Controllers
         }
 
 
-        
+
         [HttpGet("days/{GoalId}")]
         public async Task<IActionResult> GetGoalDays(int GoalId)
         {
@@ -95,7 +110,7 @@ namespace BlazorBattles.Server.Controllers
             goalDays = await _context.GoalDays.Where(day => day.GoalId == GoalId).ToListAsync();
             return Ok(goalDays);
         }
-        
+
 
     }
 }
