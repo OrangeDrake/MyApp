@@ -20,6 +20,10 @@
 
 @if (isCalendarVisible)
 {
+
+
+
+
     <span style="background-color: navajowhite;">To fullfil goal <b>@goal.Name</b> is planned reach <b>@goal.TotalValue @goal.Unit</b> spread over <b>@goal.Days.Count</b> days.</span>
 
     <br />
@@ -30,9 +34,12 @@
     cumulativeValue = 0;
 
     lastCheckedValue = 0;
-    cumulativeValues = new List<int>();
-    checkedValues = new List<int?>();
-    dates = new List<String>();
+    cumulativeValues = new List<int>
+        ();
+    checkedValues = new List<int?>
+        ();
+    dates = new List<String>
+        ();
     int i = 0;
 
 
@@ -113,6 +120,24 @@
     }
 
     <br />
+
+    @if (!isInCheck)
+    {
+        <EditForm Model="@mvB" OnValidSubmit=" MoveBoundaries" style="max-width : 600px">
+            <div class="form-group">
+                <label for="startDate">Start Date</label>
+                <InputDate id="startDate" @bind-Value="mvB.startCalendarDay" class="form-control"></InputDate>
+            </div>
+
+            <div class="form-group">
+                <label for="startDate">Start Date</label>
+                <InputDate id="startDate" @bind-Value="mvB.endCalendarDay" class="form-control"></InputDate>
+            </div>
+            <button style="margin: 8px" type="submit" class="btn btn-primary">Move boundaries</button>
+        </EditForm>
+        <br />
+    }
+
     @if (!isInCheck)
     {
         @if (isInEdit)
@@ -143,16 +168,17 @@
 
 @code {
 
+    [Inject] IToastService _toastService { get; set; }
 
-        [Parameter]
-        public bool isInCheck { get; set; }
+    [Parameter]
+    public bool isInCheck { get; set; }
 
-        [Parameter]
-        public bool isInEdit { get; set; }
-        [Parameter]
-        public Goal goal { get; set; } = null;
-        [Parameter]
-        public EventCallback onCloseChanges { get; set; }
+    [Parameter]
+    public bool isInEdit { get; set; }
+    [Parameter]
+    public Goal goal { get; set; } = null;
+    [Parameter]
+    public EventCallback onCloseChanges { get; set; }
 
     // Goal originalGoal { get; set; }
 
@@ -162,6 +188,9 @@
     private DateTime firstCalendarDay { get; set; }
     private DateTime startCalendarDay { get; set; }
     private DateTime endCalendarDay { get; set; }
+    private DateTime startCalendarDayMax { get; set; }
+    private DateTime endCalendarDayMin { get; set; }
+    MoveBoundaries mvB = new MoveBoundaries();
 
     private GoalDay currentGoalDay { get; set; } = null;
     private bool isDayInGoal { get; set; }
@@ -185,6 +214,7 @@
 
     bool[] checkboxesChecked;
     bool isInEditMultiple = false;
+
 
     private void showEditMultiple()
     {
@@ -248,6 +278,29 @@
 
     }
 
+    private void MoveBoundaries()
+    {
+        if (mvB.startCalendarDay <= startCalendarDayMax)
+        {
+            startCalendarDay = mvB.startCalendarDay;
+            var startDayNumber = (int)startCalendarDay.DayOfWeek;
+            startDayNumber = startDayNumber == 0 ? 7 : startDayNumber;
+            firstCalendarDay = startCalendarDay.AddDays(-startDayNumber + 1);
+        }
+        else
+        {
+            _toastService.ShowError("boundry can be moved only before first day");
+        }
+        if (mvB.endCalendarDay >= endCalendarDayMin)
+        {
+            endCalendarDay = mvB.endCalendarDay;
+        }
+        else
+        {
+            _toastService.ShowError("boundry can be moved only after last day");
+        }
+    }
+
 
     public async void CreateGoalHandler()
     {
@@ -259,6 +312,7 @@
 
     public async void SaveChangesHandler()
     {
+        CloseChangesHandler();
         await GoalService.EditGoal(goal);
         GoalService.CurrentGoal = GoalService.TempGoal;
         await onCloseChanges.InvokeAsync();
@@ -267,6 +321,7 @@
 
     public async void CloseChangesHandler()
     {
+        closeEditMultiple();
         await onCloseChanges.InvokeAsync();
     }
 
@@ -574,6 +629,15 @@
         }
         checkboxesChecked = checkboxesCheckedTemp;
 
+        if (modalGoalDay.StartDate < startCalendarDayMax)
+        {
+            startCalendarDayMax = modalGoalDay.StartDate;
+        }
+        else if (modalGoalDay.StartDate > endCalendarDayMin)
+        {
+            endCalendarDayMin = modalGoalDay.StartDate;
+        }
+
     }
 
 
@@ -658,6 +722,13 @@
         currentCalendarDay = firstCalendarDay;
         dayIndex = 0;
         lastPrintedMonth = -1;
+
+        startCalendarDayMax = startCalendarDay;
+        endCalendarDayMin = endCalendarDay;
+        mvB.startCalendarDay = startCalendarDay;
+        mvB.endCalendarDay = endCalendarDay;
+        startCalendarDayMax = startCalendarDay;
+        endCalendarDayMin = endCalendarDay;
     }
 
 

@@ -10,8 +10,8 @@
 }
 else
 {
-    <button class="btn btn-light" @onclick="showGoalCheck">[Close Edit]</button>
-}
+    //<button class="btn btn-light" @onclick="showGoalCheck">[Close Edit]</ button > edit multiple will not be swithech off
+    }
 
 <br />
 <EditGoal @ref="editGoal" goal="@activeGoal" isInCheck="@isInCheckSwitch" isInEdit="true" onCloseChanges="showGoalCheck"></EditGoal>
