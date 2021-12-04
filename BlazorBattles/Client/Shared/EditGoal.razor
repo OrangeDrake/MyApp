@@ -330,6 +330,7 @@
     GetStyleCumulativeValueAndDecideIfIsDayInGoal(DateTime currentCalendarDay)
     {
         dates.Add(currentCalendarDay.Date.ToShortDateString());
+        //not planned goal date, if actual day index is equal to number of days we know ther will be no more goal dayes
         if (dayIndex == goal.Days.Count)
         {
             checkedValues.Add(lastCheckedValue); // mozna je navic
@@ -343,23 +344,32 @@
             }
             else
             {
-                return new Tuple<string, int>
-                    ("border: 2px dashed black; font-weight: 400;cursor: pointer;", cumulativeValue);
+                if (!isInEditMultiple)
+                {
+                    return new Tuple<string, int>
+                        ("border: 2px dashed black; font-weight: 400;cursor: pointer;", cumulativeValue);
+                }
+                else
+                {
+                    return new Tuple<string, int>
+                       ("border: 1px solid black;  font-weight: 400;", cumulativeValue);
+                }
             }
         }
 
         currentGoalDay = goal.Days.ElementAt(dayIndex);
         //Console.WriteLine("note:" + currentGoalDay.Note);
 
+        // planned goal date
         if (currentGoalDay.StartDate.Date == currentCalendarDay.Date) // !day is goalDay
         {
             if (currentGoalDay.CheckedValue != null)
             {
                 lastCheckedValue = currentGoalDay.CheckedValue;
             }
-            cumulativeValue += currentGoalDay.Value;
-            isDayInGoal = true;
-            dayIndex++;
+            cumulativeValue += currentGoalDay.Value; // only for goal day there is cummulative value edit
+            isDayInGoal = true; // this for actual printing calendar
+            dayIndex++;// only for goal day there is dayindex inceased
 
             checkedValues.Add(lastCheckedValue);
             cumulativeValues.Add(cumulativeValue);
@@ -372,13 +382,23 @@
             }
             else
             {
-                return new Tuple<string, int>
-                    ("border: 2px solid black; background-color: PaleGreen; font-weight: 600; cursor: pointer;", cumulativeValue);
+                if (!isInEditMultiple)
+                {
+                    return new Tuple<string, int>
+                        ("border: 2px solid black; background-color: PaleGreen; font-weight: 600; cursor: pointer;", cumulativeValue);
+                }
+                else
+                {
+                    return new Tuple<string, int>
+                       ("border: 2px solid black; background-color: PaleGreen; font-weight: 600;", cumulativeValue);
+                }
             }
         }
 
+        //not planed goal date
         checkedValues.Add(lastCheckedValue);
         cumulativeValues.Add(cumulativeValue);
+
 
         isDayInGoal = false;
         if (isInCheck)
@@ -389,8 +409,16 @@
         }
         else
         {
-            return new Tuple<string, int>
-                ("border: 2px dashed black; font-weight: 400;cursor: pointer;", cumulativeValue);
+            if (!isInEditMultiple)
+            {
+                return new Tuple<string, int>
+                    ("border: 2px dashed black; font-weight: 400;cursor: pointer;", cumulativeValue);
+            }
+            else
+            {
+                return new Tuple<string, int>
+                   ("border: 1px solid black; font-weight: 400;", cumulativeValue);
+            }
         }
     }
 

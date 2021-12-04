@@ -5,7 +5,7 @@
                 <h5 class="modal-title">
                     @if (isInEdit)
                     {
-                        @if (isInEditingMultiple)
+                        @if (!isInEditingMultiple)
                         {
                             <span>Edit Day</span>
                         }
@@ -18,9 +18,9 @@
                     {
                         {<span>Create Day</span>}
                     }
-                    @if (isInEditingMultiple)
+                    @if (!isInEditingMultiple)
                     {
-                        <span>@(tempGoalDay.StartDate)</span>
+                        <span>@(tempGoalDay.StartDate.ToShortDateString())</span>
                     }
                 </h5>
                 <button type="button" class="close" data-dismiss="modal" aria-label="Close">
