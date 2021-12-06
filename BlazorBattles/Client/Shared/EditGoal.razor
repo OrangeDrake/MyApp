@@ -6,15 +6,21 @@
 
 @if (!isInCheck)
 {
-    @if (!isInEditMultiple)
+    @if (!isInEditMultiple && !isInCreateMultiple)
     {
         <button class="btn btn-primary" @onclick="showEditMultiple">Edit multiple days</button>
+        <button class="btn btn-primary" @onclick="showCreateMultiple">Crete multiple days</button>
     }
-    else
+    else if (isInEditMultiple)
     {
-        <button class="btn btn-secondary" @onclick="closeEditMultiple">Close multiple days</button>
+        <button class="btn btn-secondary" @onclick="closeEditMultiple">Cancel Editing multiple days</button>
+    }
+    else if (isInCreateMultiple)
+    {
+        <button class="btn btn-secondary" @onclick="closeCreateMultiple">Cancel Creating multiple days</button>
     }
     <br />
+
 }
 
 
@@ -102,6 +108,14 @@
                                     <input type="checkbox" checked=@checkboxesChecked[iCopy]
                                            @onchange="eventArgs => { CheckboxClicked(iCopy, eventArgs.Value); }" /> <br />
                                 }
+                                @if (!isDayInGoal && isInCreateMultiple)
+                                {
+                                    int iCopy = i;
+                                    i++;
+
+                                    <input type="checkbox" checked=@checkboxesChecked[iCopy]
+                                           @onchange="eventArgs => { CheckboxClicked(iCopy, eventArgs.Value); }" /> <br />
+                                }
 
                             </td>
 
@@ -117,6 +131,14 @@
     @if (isInEditMultiple && checkboxesChecked.Contains(true))
     {
         <button class="btn btn-primary" @onclick="editMultiple">Modify selected days</button>
+    }
+
+    <br />
+
+
+    @if (isInCreateMultiple && checkboxesChecked.Contains(true))
+    {
+        <button class="btn btn-primary" @onclick="editMultiple">Create selected days</button>
     }
 
     <br />
@@ -214,6 +236,7 @@
 
     bool[] checkboxesChecked;
     bool isInEditMultiple = false;
+    bool isInCreateMultiple = false;
 
 
     private void showEditMultiple()
@@ -224,6 +247,17 @@
     private void closeEditMultiple()
     {
         isInEditMultiple = false;
+    }
+
+
+    private void showCreateMultiple()
+    {
+        isInCreateMultiple = true;
+    }
+
+    private void closeCreateMultiple()
+    {
+        isInCreateMultiple = false;
     }
 
     public void CheckboxClicked(int i, object aChecked)
