@@ -40,12 +40,9 @@
     cumulativeValue = 0;
 
     lastCheckedValue = 0;
-    cumulativeValues = new List<int>
-        ();
-    checkedValues = new List<int?>
-        ();
-    dates = new List<String>
-        ();
+    cumulativeValues = new List<int>();
+    checkedValues = new List<int?>();
+    dates = new List<String>();
     int i = 0;
 
 
@@ -108,14 +105,19 @@
                                     <input type="checkbox" checked=@checkboxesChecked[iCopy]
                                            @onchange="eventArgs => { CheckboxClicked(iCopy, eventArgs.Value); }" /> <br />
                                 }
-                                @if (!isDayInGoal && isInCreateMultiple)
+                                else if (!isDayInGoal && isInCreateMultiple)
                                 {
                                     int iCopy = i;
                                     i++;
 
-                                    <input type="checkbox" checked=@checkboxesChecked[iCopy]
-                                           @onchange="eventArgs => { CheckboxClicked(iCopy, eventArgs.Value); }" /> <br />
+                                    <input type="checkbox" checked=@checkboxesCheckedCreate[iCopy]
+                                           @onchange="eventArgs => {CheckboxCreateClicked(iCopy, eventArgs.Value); }" /> <br />
                                 }
+                                else if (isInCreateMultiple) // for creating multiple day we counl all days, not only days possible to create(for editing multiple we count only days possible to edit)
+                                {
+                                    i++;
+                                }
+
 
                             </td>
 
@@ -152,7 +154,7 @@
             </div>
 
             <div class="form-group">
-                <label for="startDate">Start Date</label>
+                <label for="startDate">End Date</label>
                 <InputDate id="startDate" @bind-Value="mvB.endCalendarDay" class="form-control"></InputDate>
             </div>
             <button style="margin: 8px" type="submit" class="btn btn-primary">Move boundaries</button>
@@ -235,6 +237,7 @@
     List<String> dates = new List<String>();
 
     bool[] checkboxesChecked;
+    bool[] checkboxesCheckedCreate;
     bool isInEditMultiple = false;
     bool isInCreateMultiple = false;
 
@@ -253,11 +256,15 @@
     private void showCreateMultiple()
     {
         isInCreateMultiple = true;
+        var numberOfPrintedDays = (endCalendarDay - firstCalendarDay).Days + 1;
+        //Console.WriteLine("numberOfPrintedDays: " + numberOfPrintedDays);
+        checkboxesCheckedCreate = new bool[numberOfPrintedDays];
     }
 
     private void closeCreateMultiple()
     {
         isInCreateMultiple = false;
+        checkboxesCheckedCreate = null;
     }
 
     public void CheckboxClicked(int i, object aChecked)
@@ -269,6 +276,21 @@
         else
         {
             checkboxesChecked[i] = false;
+        }
+
+        StateHasChanged();
+    }
+
+
+    public void CheckboxCreateClicked(int i, object aChecked)
+    {
+        if ((bool)aChecked)
+        {
+            checkboxesCheckedCreate[i] = true;
+        }
+        else
+        {
+            checkboxesCheckedCreate[i] = false;
         }
 
         StateHasChanged();
@@ -320,6 +342,7 @@
             var startDayNumber = (int)startCalendarDay.DayOfWeek;
             startDayNumber = startDayNumber == 0 ? 7 : startDayNumber;
             firstCalendarDay = startCalendarDay.AddDays(-startDayNumber + 1);
+            showCreateMultiple();
         }
         else
         {
@@ -328,6 +351,7 @@
         if (mvB.endCalendarDay >= endCalendarDayMin)
         {
             endCalendarDay = mvB.endCalendarDay;
+            showCreateMultiple();
         }
         else
         {
@@ -378,10 +402,15 @@
             }
             else
             {
-                if (!isInEditMultiple)
+                if (!isInEditMultiple && !isInCreateMultiple) // standart printing
                 {
                     return new Tuple<string, int>
                         ("border: 2px dashed black; font-weight: 400;cursor: pointer;", cumulativeValue);
+                }
+                else if (!isInEditMultiple) // printing create multiple
+                {
+                    return new Tuple<string, int>
+                               ("border: 2px dashed black; font-weight: 400;", cumulativeValue);
                 }
                 else
                 {
@@ -416,10 +445,15 @@
             }
             else
             {
-                if (!isInEditMultiple)
+                if (!isInEditMultiple && !isInCreateMultiple) // standart printing
                 {
                     return new Tuple<string, int>
                         ("border: 2px solid black; background-color: PaleGreen; font-weight: 600; cursor: pointer;", cumulativeValue);
+                }
+                else if (!isInEditMultiple) // printing create multiple
+                {
+                    return new Tuple<string, int>
+                               ("border: 1px solid black; background-color: PaleGreen; font-weight: 400;", cumulativeValue);
                 }
                 else
                 {
@@ -443,10 +477,15 @@
         }
         else
         {
-            if (!isInEditMultiple)
+            if (!isInEditMultiple && !isInCreateMultiple) // standart printing
             {
                 return new Tuple<string, int>
                     ("border: 2px dashed black; font-weight: 400;cursor: pointer;", cumulativeValue);
+            }
+            else if (!isInEditMultiple) // printing create multiple
+            {
+                return new Tuple<string, int>
+                           ("border: 2px dashed black; font-weight: 400;", cumulativeValue);
             }
             else
             {
@@ -459,7 +498,7 @@
 
     private void CellClicked(DateTime currentDay, int currentCellcumulativeValue)
     {
-        if (isInEditMultiple) // if in editing mode of editing multiple days clicking on cells make no action
+        if (isInEditMultiple || isInCreateMultiple) // if in editing mode of editing multiple days clicking on cells make no action
         {
             return;
         }
