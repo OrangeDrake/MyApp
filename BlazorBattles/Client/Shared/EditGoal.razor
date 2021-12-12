@@ -138,9 +138,9 @@
     <br />
 
 
-    @if (isInCreateMultiple && checkboxesChecked.Contains(true))
+    @if (isInCreateMultiple && checkboxesCheckedCreate.Contains(true))
     {
-        <button class="btn btn-primary" @onclick="editMultiple">Create selected days</button>
+        <button class="btn btn-primary" @onclick="createMultiple">Create selected days</button>
     }
 
     <br />
@@ -365,7 +365,6 @@
         await GoalService.AddGoal(goal);
         //await GoalService.LoadGoals();
         NavigationManager.NavigateTo("dashboard", true);
-
     }
 
     public async void SaveChangesHandler()
@@ -535,6 +534,14 @@
         Modal.Open();
     }
 
+    private void createMultiple()
+    {
+
+        modalGoalDay = new GoalDay { IsAllDay = goal.IsAllDayGenerated, StartDate = new DateTime(), LengthTime = goal.LengthTimeGenerated };
+        isModalInEditMode = false;
+        Modal.Open();
+    }
+
 
     private void recalculate(int recalculateMode, int valueChange, bool modifyDuration, bool modifyNote)
     {
@@ -698,7 +705,6 @@
             }
             i++;
         }
-
         CopyValueAndDurationAndNote(modifyDuration, modifyNote, modifyValue);//value have to be copied from edited temp day to all selected dayas
     }
 

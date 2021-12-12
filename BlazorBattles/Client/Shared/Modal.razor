@@ -5,7 +5,7 @@
                 <h5 class="modal-title">
                     @if (isInEdit)
                     {
-                        @if (!isInEditingMultiple)
+                        @if (!isWorkingWithMultiple)
                         {
                             <span>Edit Day</span>
                         }
@@ -16,9 +16,16 @@
                     }
                     else
                     {
-                        {<span>Create Day</span>}
+                        @if (!isWorkingWithMultiple)
+                        {
+                            <span>Create Day</span>
+                        }
+                        else
+                        {
+                            <span>Create Multiple Days</span>
+                        }
                     }
-                    @if (!isInEditingMultiple)
+                    @if (!isWorkingWithMultiple)
                     {
                         <span>@(tempGoalDay.StartDate.ToShortDateString())</span>
                     }
@@ -33,7 +40,7 @@
 
                     <div class="form-group">
                         <label for="value">Value</label>
-                        @if (isInEditingMultiple)
+                        @if (isWorkingWithMultiple && isInEdit)
                         {
                             <snap style="font-style:italic"> Should be Edited</snap>
                             <InputCheckbox @bind-Value=modifyValue></InputCheckbox><br />
@@ -62,7 +69,7 @@
                     <div class="form-group">
                         <label for="showTime">All Day</label>
 
-                        @if (isInEditingMultiple)
+                        @if (isWorkingWithMultiple && isInEdit)
                         {
                             <snap style="font-style:italic"> Should be Edited</snap>
                             <InputCheckbox @bind-Value=modifyDuration></InputCheckbox><br />
@@ -81,7 +88,7 @@
                     </div>
                     <div class="form-group">
                         <label for="note">Note</label>
-                        @if (isInEditingMultiple)
+                        @if (isWorkingWithMultiple && isInEdit)
                         {
                             <snap style="font-style:italic"> Should be Edited</snap>
                             <InputCheckbox @bind-Value=modifyNote></InputCheckbox><br />
@@ -162,7 +169,7 @@
     public string ModalClass = "";
     public bool ShowBackdrop = false;
 
-    bool isInEditingMultiple;
+    bool isWorkingWithMultiple;
     bool modifyValue;
     bool modifyDuration;
     bool modifyNote;
@@ -227,7 +234,7 @@
             recalculateMode = -1;
         }
 
-        await OnValueChanged.InvokeAsync((recalculateMode, valueChange,modifyDuration,modifyNote));
+        await OnValueChanged.InvokeAsync((recalculateMode, valueChange, modifyDuration, modifyNote));
         await OnGoalDayChanged.InvokeAsync();
         Close();
 
@@ -246,7 +253,7 @@
 
     private async void Remove()
     {
-        await OnValueChanged.InvokeAsync((recalculateMode, editGoalDay.Value,false,false));
+        await OnValueChanged.InvokeAsync((recalculateMode, editGoalDay.Value, false, false));
         await OnDeleteButtonClicked.InvokeAsync();
         await OnGoalDayChanged.InvokeAsync();
         Close();
@@ -255,7 +262,7 @@
 
     protected override void OnParametersSet()
     {
-        isInEditingMultiple = editGoalDay.StartDate == new DateTime();
+        isWorkingWithMultiple = editGoalDay.StartDate == new DateTime();
         modifyValue = true;
         modifyDuration = true;
         modifyNote = true;
