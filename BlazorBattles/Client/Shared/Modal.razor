@@ -105,11 +105,25 @@
                 @if (isInEdit)
                 {
                     <button type="button" class="btn btn-primary" @onclick="() => SaveGoalDay()">Confirm changes</button>
-                    <button type="button" class="btn btn-danger" @onclick="() => ShowRemoveDialog()">Remove day</button>
+                    @if (!isWorkingWithMultiple)
+                    {
+                        <button type="button" class="btn btn-danger" @onclick="() => ShowRemoveDialog()">Remove day</button>
+                    }
+                    else
+                    {
+                        <button type="button" class="btn btn-danger" @onclick="() => ShowRemoveDialog()">Remove days</button>
+                    }
                 }
                 else
                 {
-                    <button type="button" class="btn btn-primary" @onclick="() =>  SaveGoalDay()">Add day</button>
+                    @if (!isWorkingWithMultiple)
+                    {
+                        <button type="button" class="btn btn-primary" @onclick="() => SaveGoalDay()">Add day</button>
+                    }
+                    else
+                    {
+                        <button type="button" class="btn btn-primary" @onclick="() => SaveGoalDay()">Add days</button>
+                    }
                 }
                 <button type="button" class="btn btn-secondary" data-dismiss="modal" @onclick="() => Close()">Close</button>
             </div>
@@ -125,10 +139,18 @@
                             </InputRadioGroup>
                         </div>
                     </EditForm>
-
-                    <button type="button" class="btn btn-danger" @onclick="() => Remove()">Realy Remove day</button>
-                    <button type="button" class="btn btn-secondary" data-dismiss="modal" @onclick="() => HideRemoveDialog()">Don't remove day</button>
+                    @if (!isWorkingWithMultiple)
+                    {
+                        <button type="button" class="btn btn-danger" @onclick="() => Remove()">Really Remove day</button>
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal" @onclick="() => HideRemoveDialog()">Don't remove day</button>
+                    }
+                    else
+                    {
+                        <button type="button" class="btn btn-danger" @onclick="() => Remove()">Really Remove days</button>
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal" @onclick="() => HideRemoveDialog()">Don't remove days</button>
+                    }
                 }
+
             </div>
         </div>
     </div>
@@ -224,7 +246,7 @@
         editGoalDay.IsAllDay = tempGoalDay.IsAllDay;
         editGoalDay.LengthTime = tempGoalDay.LengthTime;
 
-        if (!isInEdit)
+        if (!isInEdit && !isWorkingWithMultiple)
         {
             await OnCreateButtonClicked.InvokeAsync(); // will add goalDay to List
         }

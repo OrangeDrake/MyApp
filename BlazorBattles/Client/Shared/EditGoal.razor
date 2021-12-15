@@ -26,10 +26,6 @@
 
 @if (isCalendarVisible)
 {
-
-
-
-
     <span style="background-color: navajowhite;">To fullfil goal <b>@goal.Name</b> is planned reach <b>@goal.TotalValue @goal.Unit</b> spread over <b>@goal.Days.Count</b> days.</span>
 
     <br />
@@ -516,7 +512,7 @@
             isModalInEditMode = true;
             Modal.Open();
         }
-        else if (!isInCheck) // creatinggoal
+        else if (!isInCheck) // creating goal
         {
             TimeSpan genetaredTime = goal.StartDateGenerated.TimeOfDay;
             modalGoalDay = new GoalDay { IsAllDay = goal.IsAllDayGenerated, StartDate = currentDay.Date + genetaredTime, LengthTime = goal.LengthTimeGenerated };
@@ -543,9 +539,10 @@
     }
 
 
+    //modify node and duration is straightforward, modify value depends on recalculation mode and also sometimes values has to be copyed before recalculation sometimes after
     private void recalculate(int recalculateMode, int valueChange, bool modifyDuration, bool modifyNote)
     {
-        if (!isInEditMultiple) //single day editing
+        if (!isInEditMultiple && !isInCreateMultiple) //single day editing
         {
             if (recalculateMode == 0)
             {
@@ -554,6 +551,13 @@
             else if (recalculateMode == 1)
             {
                 RecalcutateTotalValue(valueChange);
+            }
+        }
+        else if (!isModalInEditMode) //creating multiple day
+        {
+            if (recalculateMode == 1)
+            {
+                RecalcutateTotalValueMultiplePlusCreatingDays(modalGoalDay);
             }
         }
         else // multiple days recalculation
@@ -572,6 +576,27 @@
             }
         }
     }
+
+    private void RecalcutateTotalValueMultiplePlusCreatingDays(GoalDay modalGoalDay)
+    {
+        int numberOfDays = 0;
+        List<GoalDay> tempDayList = new List<GoalDay>();
+        for (int i = 0; i < checkboxesCheckedCreate.Length; i++)
+        {
+            if (checkboxesCheckedCreate[i])
+            {
+                tempDayList.Add(new GoalDay { Value = modalGoalDay.Value, IsAllDay = modalGoalDay.IsAllDay, LengthTime = modalGoalDay.LengthTime, Note = modalGoalDay.Note, StartDate = firstCalendarDay.AddDays(i) });
+                numberOfDays++;
+            }
+        }
+        RecalcutateTotalValue(-numberOfDays * modalGoalDay.Value);
+
+        goal.Days.AddRange(tempDayList);
+        goal.Days.Sort();
+
+        //creation missing checkboxesChecked
+    }
+
 
 
     private void RecalcutateTotalValueMultiplePlusCopyValueAndDurationAndNote(bool modifyDuration, bool modifyNote, bool modifyValue)
