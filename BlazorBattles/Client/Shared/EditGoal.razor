@@ -405,7 +405,7 @@
                 else if (!isInEditMultiple) // printing create multiple
                 {
                     return new Tuple<string, int>
-                               ("border: 2px dashed black; font-weight: 400;", cumulativeValue);
+                        ("border: 2px dashed black; font-weight: 400;", cumulativeValue);
                 }
                 else
                 {
@@ -519,7 +519,6 @@
             isModalInEditMode = false;
             Modal.Open();
         }
-
     }
 
     private void editMultiple()
@@ -555,7 +554,11 @@
         }
         else if (!isModalInEditMode) //creating multiple day
         {
-            if (recalculateMode == 1)
+            if (recalculateMode == 0)
+            {
+                DistributeValueChangeToDaysMultiplePlusCreatingDays(modalGoalDay);
+            }
+            else
             {
                 RecalcutateTotalValueMultiplePlusCreatingDays(modalGoalDay);
             }
@@ -579,23 +582,54 @@
 
     private void RecalcutateTotalValueMultiplePlusCreatingDays(GoalDay modalGoalDay)
     {
-        int numberOfDays = 0;
+        int numberOfDaysNewDays = 0;
         List<GoalDay> tempDayList = new List<GoalDay>();
         for (int i = 0; i < checkboxesCheckedCreate.Length; i++)
         {
             if (checkboxesCheckedCreate[i])
             {
                 tempDayList.Add(new GoalDay { Value = modalGoalDay.Value, IsAllDay = modalGoalDay.IsAllDay, LengthTime = modalGoalDay.LengthTime, Note = modalGoalDay.Note, StartDate = firstCalendarDay.AddDays(i) });
-                numberOfDays++;
+                numberOfDaysNewDays++;
             }
         }
-        RecalcutateTotalValue(-numberOfDays * modalGoalDay.Value);
+        RecalcutateTotalValue(-numberOfDaysNewDays * modalGoalDay.Value);
 
         goal.Days.AddRange(tempDayList);
         goal.Days.Sort();
 
+        checkboxesChecked = new bool[checkboxesChecked.Length + numberOfDaysNewDays];
+
+        closeCreateMultiple();
         //creation missing checkboxesChecked
     }
+
+    private void DistributeValueChangeToDaysMultiplePlusCreatingDays(GoalDay modalGoalDay)
+    {
+        int numberOfDaysNewDays = 0;
+        List<GoalDay> tempDayList = new List<GoalDay>();
+        for (int i = 0; i < checkboxesCheckedCreate.Length; i++)
+        {
+            if (checkboxesCheckedCreate[i])
+            {
+                tempDayList.Add(new GoalDay { Value = modalGoalDay.Value, IsAllDay = modalGoalDay.IsAllDay, LengthTime = modalGoalDay.LengthTime, Note = modalGoalDay.Note, StartDate = firstCalendarDay.AddDays(i) });
+                numberOfDaysNewDays++;
+            }
+        }
+
+        DistributeValueChangeToDays(null, -numberOfDaysNewDays * modalGoalDay.Value);
+
+        goal.Days.AddRange(tempDayList);
+        goal.Days.Sort();
+
+        checkboxesChecked = new bool[checkboxesChecked.Length + numberOfDaysNewDays];
+
+        closeCreateMultiple();
+        //creation missing checkboxesChecked
+    }
+
+
+
+
 
 
 
@@ -653,7 +687,11 @@
     {
 
         int valueChangeMultiplier = 1;
-        int daysCount = goal.Days.Count - 1; // we dont count excluded day
+        int daysCount = goal.Days.Count;
+
+        if (excludedDay != null)        {
+            daysCount -= 1; // we dont count excluded day
+        }
 
         int Value = valueChange / daysCount;
         if (valueChange < 0)
