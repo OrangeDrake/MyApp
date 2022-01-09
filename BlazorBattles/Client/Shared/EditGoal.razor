@@ -143,7 +143,7 @@
 
     @if (!isInCheck)
     {
-        <EditForm Model="@mvB" OnValidSubmit=" MoveBoundaries" style="max-width : 600px">
+        <EditForm Model="@mvB" OnValidSubmit="MoveBoundaries" style="max-width : 600px">
             <div class="form-group">
                 <label for="startDate">Start Date</label>
                 <InputDate id="startDate" @bind-Value="mvB.startCalendarDay" class="form-control"></InputDate>
@@ -338,7 +338,7 @@
             var startDayNumber = (int)startCalendarDay.DayOfWeek;
             startDayNumber = startDayNumber == 0 ? 7 : startDayNumber;
             firstCalendarDay = startCalendarDay.AddDays(-startDayNumber + 1);
-            showCreateMultiple();
+            //showCreateMultiple();
         }
         else
         {
@@ -347,7 +347,7 @@
         if (mvB.endCalendarDay >= endCalendarDayMin)
         {
             endCalendarDay = mvB.endCalendarDay;
-            showCreateMultiple();
+            //showCreateMultiple();
         }
         else
         {
@@ -367,7 +367,9 @@
     {
         CloseChangesHandler();
         await GoalService.EditGoal(goal);
-        GoalService.CurrentGoal = GoalService.TempGoal;
+        //GoalService.CurrentGoal = GoalService.TempGoal;
+        //Chybi nahrani samotneho goal
+        await GoalService.LoadGoalDays();
         await onCloseChanges.InvokeAsync();
 
     }

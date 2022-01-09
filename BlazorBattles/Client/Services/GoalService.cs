@@ -49,6 +49,11 @@ namespace BlazorBattles.Client.Services
 
         public async Task EditGoal(Goal goal)
         {
+            //foreach (GoalDay day in goal.Days)
+            //{
+            //    day.Id = 0;
+            //}
+
             var result = await _http.PutAsJsonAsync<Goal>("api/goal", goal);
 
             if (result.StatusCode != System.Net.HttpStatusCode.OK)
