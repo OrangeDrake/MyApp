@@ -284,7 +284,7 @@
 
     protected override void OnParametersSet()
     {
-        isWorkingWithMultiple = editGoalDay.StartDate == new DateTime();
+        isWorkingWithMultiple = editGoalDay.StartDate.Date == new DateTime().Date;
         modifyValue = true;
         modifyDuration = true;
         modifyNote = true;

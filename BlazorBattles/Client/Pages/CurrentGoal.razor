@@ -1,17 +1,19 @@
 ﻿@page "/currentgoal"
 @inject IGoalService GoalService
-
+@inject NavigationManager NavigationManager
+@inject IJSRuntime JSRuntime
 @attribute [Authorize]
 
 <h3>CurrentGoal</h3>
 @if (isInCheckSwitch)
 {
     <button class="btn btn-light" @onclick="showGoalEdit">[Edit Goal]</button>
+    <button class="btn btn-light" @onclick="ExportCalendar">[Export Calendar]</button>
 }
 else
 {
     //<button class="btn btn-light" @onclick="showGoalCheck">[Close Edit]</ button > edit multiple will not be swithech off
-    }
+}
 
 <br />
 <EditGoal @ref="editGoal" goal="@activeGoal" isInCheck="@isInCheckSwitch" isInEdit="true" onCloseChanges="showGoalCheck"></EditGoal>
@@ -26,13 +28,28 @@ else
 
 @code {
 
-
     public Goal activeGoal { get; set; }
 
     private EditGoal editGoal { get; set; }
     public Goal goal { get; set; }
     //private bool isEditHidden { get; set; } = true;
     public bool isInCheckSwitch { get; set; } = true;
+
+    /*
+    protected void exportCalendat()
+    {
+        GoalService.ExportCalendarAsync(activeGoal);
+    }
+    */
+
+    public async void ExportCalendar()
+
+    {
+        String calendar = GoalService.PrepareCalenderExport(activeGoal);
+        byte[] file = System.Text.Encoding.UTF8.GetBytes(calendar);
+        await JSRuntime.InvokeVoidAsync("BlazorDownloadFile", "calendarExport.txt", "text/plain", file);        
+    }
+
 
     protected override void OnInitialized()
     {
@@ -47,6 +64,16 @@ else
         activeGoal = GoalService.TempGoal;
         isInCheckSwitch = false;
 
+    }
+
+    protected override void OnAfterRender(bool firstRender)
+    {
+        Console.WriteLine("neco");
+        if (activeGoal == null)
+        {
+            //NavigationManager.NavigateTo("dashboard");
+            activeGoal = GoalService.CurrentGoal;
+        }
     }
 
     private void showGoalCheck()
@@ -90,6 +117,7 @@ else
         return goalDaya;
 
     }
+
 
 
 }

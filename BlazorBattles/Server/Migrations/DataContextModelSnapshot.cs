@@ -106,8 +106,8 @@ namespace BlazorBattles.Server.Migrations
                     b.Property<bool>("IsAllDay")
                         .HasColumnType("bit");
 
-                    b.Property<TimeSpan>("LengthTime")
-                        .HasColumnType("time");
+                    b.Property<long>("LengthTime")
+                        .HasColumnType("bigint");
 
                     b.Property<string>("Note")
                         .HasColumnType("nvarchar(max)");

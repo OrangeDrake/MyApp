@@ -314,14 +314,14 @@
 
         /*
         if (firstRender && goal != null)
-        //if(firstRender)
-        {
+            //if(firstRender)
+            {
             await JSRuntime.InvokeVoidAsync("drawChart", dates, cumulativeValues, checkedValues);
 
         }
 
         else if (firstRenderAfterEdit)
-        {
+            {
 
             await JSRuntime.InvokeVoidAsync("drawChart", dates, cumulativeValues, checkedValues);
             firstRenderAfterEdit = false;
@@ -526,7 +526,7 @@
     private void editMultiple()
     {
 
-        modalGoalDay = new GoalDay { IsAllDay = goal.IsAllDayGenerated, StartDate = new DateTime(), LengthTime = goal.LengthTimeGenerated };
+        modalGoalDay = new GoalDay { IsAllDay = goal.IsAllDayGenerated, StartDate = new DateTime() + goal.StartDateGenerated.TimeOfDay, LengthTime = goal.LengthTimeGenerated };
         isModalInEditMode = true;
         Modal.Open();
     }
@@ -673,6 +673,7 @@
                 if (modifyDuration)
                 {
                     day.LengthTime = modalGoalDay.LengthTime;
+                    day.StartDate = day.StartDate.Date + modalGoalDay.StartDate.TimeOfDay;
                     day.IsAllDay = modalGoalDay.IsAllDay;
                 }
 

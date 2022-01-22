@@ -10,8 +10,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace BlazorBattles.Server.Migrations
 {
     [DbContext(typeof(DataContext))]
-    [Migration("20211010003842_initial")]
-    partial class initial
+    [Migration("20220116100245_init")]
+    partial class init
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -99,14 +99,17 @@ namespace BlazorBattles.Server.Migrations
                         .HasColumnType("int")
                         .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
+                    b.Property<int?>("CheckedValue")
+                        .HasColumnType("int");
+
                     b.Property<int>("GoalId")
                         .HasColumnType("int");
 
                     b.Property<bool>("IsAllDay")
                         .HasColumnType("bit");
 
-                    b.Property<TimeSpan>("LengthTime")
-                        .HasColumnType("time");
+                    b.Property<long>("LengthTime")
+                        .HasColumnType("bigint");
 
                     b.Property<string>("Note")
                         .HasColumnType("nvarchar(max)");

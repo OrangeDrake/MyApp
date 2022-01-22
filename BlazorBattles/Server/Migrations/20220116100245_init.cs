@@ -3,7 +3,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 namespace BlazorBattles.Server.Migrations
 {
-    public partial class initial : Migration
+    public partial class init : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
@@ -142,9 +142,10 @@ namespace BlazorBattles.Server.Migrations
                     GoalId = table.Column<int>(type: "int", nullable: false),
                     IsAllDay = table.Column<bool>(type: "bit", nullable: false),
                     StartDate = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    LengthTime = table.Column<TimeSpan>(type: "time", nullable: false),
+                    LengthTime = table.Column<long>(type: "bigint", nullable: false),
                     Note = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    Value = table.Column<int>(type: "int", nullable: false)
+                    Value = table.Column<int>(type: "int", nullable: false),
+                    CheckedValue = table.Column<int>(type: "int", nullable: true)
                 },
                 constraints: table =>
                 {

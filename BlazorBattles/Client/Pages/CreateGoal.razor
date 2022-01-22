@@ -1,4 +1,5 @@
 ﻿@page "/creategoal"
+@inject IGoalService GoalService
 @attribute [Authorize]
 
 <h3>CreateGoal111</h3>
@@ -119,7 +120,8 @@
 
     private EditContext editContext;
 
-    private void stub() {
+    private void stub()
+    {
 
     }
 

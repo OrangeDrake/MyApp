@@ -16,8 +16,8 @@ namespace BlazorBattles.Client.Services
         public Task EditGoal(Goal goal);
         public Task LoadGoals();
         public Task LoadGoalDays();
-
         public Task CheckGoalDay(GoalDay goalDay);
+        public String PrepareCalenderExport(Goal currentGoal);
 
 
     }

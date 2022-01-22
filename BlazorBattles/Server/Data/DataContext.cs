@@ -1,6 +1,7 @@
 ﻿using BlazorBattles.Client.Shared;
 using BlazorBattles.Shared;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -32,6 +33,11 @@ namespace BlazorBattles.Server.Data
                 .HasOne(b => b.Winner)
                 .WithMany()
                 .OnDelete(DeleteBehavior.NoAction);
+            
+            modelBuilder.Entity<GoalDay>()
+                .Property(d => d.LengthTime)
+                .HasConversion(new TimeSpanToTicksConverter());
+            
         }
 
         public DbSet<Unit> Units { get; set; }
