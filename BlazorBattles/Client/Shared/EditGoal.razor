@@ -191,10 +191,10 @@
     [Inject] IToastService _toastService { get; set; }
 
     [Parameter]
-    public bool isInCheck { get; set; }
+    public bool isInCheck { get; set; } //true for cheging progress, false for editing planed goal
 
     [Parameter]
-    public bool isInEdit { get; set; }
+    public bool isInEdit { get; set; } //false only fore creating new goal
     [Parameter]
     public Goal goal { get; set; } = null;
     [Parameter]

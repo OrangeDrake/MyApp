@@ -31,6 +31,11 @@ namespace BlazorBattles.Server.Controllers
             var user = await _utilityService.GetUser();
             goal.UserId = user.Id;
 
+            foreach(GoalDay day in goal.Days)
+            {
+                day.UserId = user.Id;
+            }
+
             _context.Goals.Add(goal);
             await _context.SaveChangesAsync();
             return Ok("Goal added days:" + goal.Days.Count);
@@ -43,7 +48,14 @@ namespace BlazorBattles.Server.Controllers
         [HttpPut("day")]
         public async Task<IActionResult> CheckGoalDay(GoalDay goalDay)
         {
+                       
             var checkGoalDay = await _context.GoalDays.FirstOrDefaultAsync(goalDayDatabase => goalDayDatabase.Id == goalDay.Id);
+            var user = await _utilityService.GetUser();
+            
+            if (goalDay.UserId != user.Id)
+            {
+                return BadRequest("User does not match");
+            }
 
             if (goalDay.Note == null)
             {

@@ -88,10 +88,17 @@ namespace BlazorBattles.Client.Services
         }
 
         public async Task CheckGoalDay(GoalDay goalDay)
-        {
-            Console.WriteLine("in service, in check goal");
+        {            
             var result = await _http.PutAsJsonAsync<GoalDay>("api/goal/day", goalDay);
-            Console.WriteLine("Returned from controler: " + await result.Content.ReadAsStringAsync());
+            
+            if (result.StatusCode != System.Net.HttpStatusCode.OK)
+            {
+                _toastService.ShowError(await result.Content.ReadAsStringAsync());
+            }
+            else
+            {
+                _toastService.ShowSuccess(await result.Content.ReadAsStringAsync());
+            }
         }
 
         public String PrepareCalenderExport(Goal currentGoal)

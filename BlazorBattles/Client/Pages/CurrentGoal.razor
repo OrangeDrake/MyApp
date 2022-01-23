@@ -68,11 +68,11 @@ else
 
     protected override void OnAfterRender(bool firstRender)
     {
-        Console.WriteLine("neco");
+        //Console.WriteLine("neco");
         if (activeGoal == null)
         {
-            //NavigationManager.NavigateTo("dashboard");
-            activeGoal = GoalService.CurrentGoal;
+            NavigationManager.NavigateTo("dashboard");
+            //activeGoal = GoalService.CurrentGoal;
         }
     }
 
