@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace BlazorBattles.Client.Services
 {
-    interface IGoalService
+    public interface IGoalService
     {
         public Goal CurrentGoal { get; set; }
         public Goal TempGoal { get; set; }
