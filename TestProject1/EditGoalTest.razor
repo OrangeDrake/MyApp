@@ -6,20 +6,56 @@
         // Arrange
         using var ctx = new TestContext();
         ctx.JSInterop.Mode = JSRuntimeMode.Loose;
+
+        var myFakeToastService = Substitute.For<IToastService>();
+
+        ctx.Services.AddSingleton<IToastService>(myFakeToastService);
+        //var httpMock = ctx.Services.AddMockHttpClient();
+
+        //ctx.Services.AddSingleton<IGoalService>(new GoalService(myFakeToastService, httpMock));
+        var myFakeGoalService = Substitute.For<IGoalService>();
+        ctx.Services.AddSingleton<IGoalService>(myFakeGoalService);
+
+        //var authContext = ctx.AddTestAuthorization();
+        //authContext.SetAuthorized("TEST USER");
         // Act
 
+        var eventCalled = false;
+
+        var testGoal = new Goal();
+        testGoal.TotalValue = 60;
+        testGoal.Days.Add(new GoalDay { StartDate = DateTime.Parse("28/12/2019"), Value = 30 });
+        testGoal.Days.Add(new GoalDay { StartDate = DateTime.Parse("29/12/2019"), Value = 20 });
 
         var component = ctx.RenderComponent<EditGoal>(
                 parameters =>
                   parameters
                     // Add parameters
                     .Add(c => c.isInCheck, false)
-                    .Add(c => c.isInCheck, false)
-                    .Add(c => c.goal, new Goal())
-                    .Add(c => c.onCloseChanges, null)
+                    .Add(c => c.isInEdit, false)
+                    .Add(c => c.goal, testGoal)
+                    .Add(c => c.onCloseChanges, () => { eventCalled = true; })
               );
-        component.MarkupMatches(@<h1>Hello world from Blazor2</h1>);
-        //cut.MarkupMatches(@<h1>Hello world from Blazor2</h1>);
 
+
+        Assert.Equal(30, testGoal.Days[0].Value);
+        component.Nodes.QuerySelector("[id$=29]").Click();
+        component.Nodes.QuerySelector("[id$=value]").Change(31);
+
+
+        component.Find("#confirm-changes").Click();
+        //component.Nodes.QuerySelector("[id$=confirm-changes").Click();
+        Assert.Equal(19, testGoal.Days[0].Value);
+
+
+
+        
+        //component.MarkupMatches(
+    //@<h1>Hello world from Blazor2</h1>);
+       // Assert.Equal(testGoal.Days[0].Value, 30);
+        //InvokeAsync(()=>)
+   
+    
     }
+
 }

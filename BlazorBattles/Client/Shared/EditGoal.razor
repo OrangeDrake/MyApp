@@ -29,6 +29,7 @@
     <span style="background-color: navajowhite;">To fullfil goal <b>@goal.Name</b> is planned reach <b>@goal.TotalValue @goal.Unit</b> spread over <b>@goal.Days.Count</b> days.</span>
 
     <br />
+    <br />
 
     currentCalendarDay = firstCalendarDay;
     dayIndex = 0;
@@ -69,8 +70,8 @@
                     @for (int j = 0; j < 7; j++)
                     {
                         @if (currentCalendarDay < startCalendarDay || currentCalendarDay > endCalendarDay)
-                        {
-                            <td style="color: grey; font-weight: 200;"> @currentCalendarDay.ToString("dd")</td>
+                        {                            
+                            <td class="outOfRange"> @currentCalendarDay.ToString("dd")</td>                             
                         }
                         else
                         {
@@ -79,7 +80,7 @@
                             String currentCellStyle = styleAndCumulativeValue.Item1;
                             int currentCellCumulativeValue = styleAndCumulativeValue.Item2;
 
-                            <td style=@currentCellStyle @onclick="() => CellClicked(cellCalendarDay,currentCellCumulativeValue)">
+                            <td id=@currentCalendarDay.ToString("dd") class=@currentCellStyle @onclick="() => CellClicked(cellCalendarDay,currentCellCumulativeValue)">
                                 <span>@currentCalendarDay.ToString("dd"). </span>
                                 @if (isDayInGoal)
                                 {
@@ -141,7 +142,7 @@
 
     <br />
 
-    @if (!isInCheck)
+    @if (!isInCheck && !isInCreateMultiple && !isInEditMultiple)
     {
         <EditForm Model="@mvB" OnValidSubmit="MoveBoundaries" style="max-width : 600px">
             <div class="form-group">
@@ -314,17 +315,17 @@
 
         /*
         if (firstRender && goal != null)
-            //if(firstRender)
-            {
-            await JSRuntime.InvokeVoidAsync("drawChart", dates, cumulativeValues, checkedValues);
+        //if(firstRender)
+        {
+        await JSRuntime.InvokeVoidAsync("drawChart", dates, cumulativeValues, checkedValues);
 
-        }
+    }
 
-        else if (firstRenderAfterEdit)
-            {
+    else if (firstRenderAfterEdit)
+        {
 
-            await JSRuntime.InvokeVoidAsync("drawChart", dates, cumulativeValues, checkedValues);
-            firstRenderAfterEdit = false;
+        await JSRuntime.InvokeVoidAsync("drawChart", dates, cumulativeValues, checkedValues);
+        firstRenderAfterEdit = false;
         }
         */
 
@@ -402,7 +403,8 @@
                 if (!isInEditMultiple && !isInCreateMultiple) // standart printing
                 {
                     return new Tuple<string, int>
-                        ("border: 2px dashed black; font-weight: 400;cursor: pointer;", cumulativeValue);
+                       // ("border: 2px dashed black; font-weight: 400;cursor: pointer;", cumulativeValue);
+                       ("notGoalDay", cumulativeValue);
                 }
                 else if (!isInEditMultiple) // printing create multiple
                 {
@@ -421,7 +423,7 @@
         //Console.WriteLine("note:" + currentGoalDay.Note);
 
         // planned goal date
-        if (currentGoalDay.StartDate.Date == currentCalendarDay.Date) // !day is goalDay
+        if (currentGoalDay.StartDate.Date == currentCalendarDay.Date) // day is goalDay
         {
             if (currentGoalDay.CheckedValue != null)
             {
@@ -434,7 +436,7 @@
             checkedValues.Add(lastCheckedValue);
             cumulativeValues.Add(cumulativeValue);
 
-            if (isInCheck)
+            if (isInCheck) // checking achived value
             {
 
                 return new Tuple<string, int>
@@ -445,14 +447,15 @@
                 if (!isInEditMultiple && !isInCreateMultiple) // standart printing
                 {
                     return new Tuple<string, int>
-                        ("border: 2px solid black; background-color: PaleGreen; font-weight: 600; cursor: pointer;", cumulativeValue);
+                        //("border: 2px solid black; background-color: PaleGreen; font-weight: 600; cursor: pointer;", cumulativeValue);
+                        ("goalDay", cumulativeValue);
                 }
                 else if (!isInEditMultiple) // printing create multiple
                 {
                     return new Tuple<string, int>
                                ("border: 1px solid black; background-color: PaleGreen; font-weight: 400;", cumulativeValue);
                 }
-                else
+                else // creating multiple
                 {
                     return new Tuple<string, int>
                        ("border: 2px solid black; background-color: PaleGreen; font-weight: 600;", cumulativeValue);
@@ -477,7 +480,8 @@
             if (!isInEditMultiple && !isInCreateMultiple) // standart printing
             {
                 return new Tuple<string, int>
-                    ("border: 2px dashed black; font-weight: 400;cursor: pointer;", cumulativeValue);
+                    //("border: 2px dashed black; font-weight: 400;cursor: pointer;", cumulativeValue);
+                    ("notGoalDay", cumulativeValue);
             }
             else if (!isInEditMultiple) // printing create multiple
             {
@@ -601,6 +605,8 @@
 
         checkboxesChecked = new bool[checkboxesChecked.Length + numberOfDaysNewDays];
 
+        updateStartCalendarDayMaxAndEndCalendarDayMin();
+
         closeCreateMultiple();
         //creation missing checkboxesChecked
     }
@@ -624,6 +630,7 @@
         goal.Days.Sort();
 
         checkboxesChecked = new bool[checkboxesChecked.Length + numberOfDaysNewDays];
+
 
         closeCreateMultiple();
         //creation missing checkboxesChecked
@@ -781,6 +788,15 @@
 
     }
 
+    private void updateStartCalendarDayMaxAndEndCalendarDayMin()
+    {
+        startCalendarDayMax = goal.Days.First().StartDate;
+        endCalendarDayMin = goal.Days.Last().StartDate;
+
+    }
+
+
+
 
 
     private void createGoalDay()
@@ -802,14 +818,7 @@
         }
         checkboxesChecked = checkboxesCheckedTemp;
 
-        if (modalGoalDay.StartDate < startCalendarDayMax)
-        {
-            startCalendarDayMax = modalGoalDay.StartDate;
-        }
-        else if (modalGoalDay.StartDate > endCalendarDayMin)
-        {
-            endCalendarDayMin = modalGoalDay.StartDate;
-        }
+        updateStartCalendarDayMaxAndEndCalendarDayMin();
 
     }
 
@@ -833,6 +842,7 @@
                 checkboxesCheckedTemp[j++] = checkboxesChecked[i]; // in same passage (no else here!!) value is also copyed from original array, so j is increaed twice, new array is inceased by 1 so it matches
             }
             checkboxesChecked = checkboxesCheckedTemp;
+           
         }
 
         else
@@ -864,6 +874,8 @@
             }
             checkboxesChecked = checkboxesCheckedTemp;
         }
+
+        updateStartCalendarDayMaxAndEndCalendarDayMin();
 
     }
 

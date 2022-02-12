@@ -43,7 +43,9 @@
                         @if (isWorkingWithMultiple && isInEdit)
                         {
                             <snap style="font-style:italic"> Should be Edited</snap>
-                            <InputCheckbox @bind-Value=modifyValue></InputCheckbox><br />
+                            <InputCheckbox @bind-Value=modifyValue></InputCheckbox>
+
+                            <br />
                         }
                         @if (modifyValue)
                         {
@@ -52,16 +54,30 @@
 
                             <InputRadioGroup id="recalculate" @bind-Value="recalculateMode" class="form-control">
                                 @if (isInEdit)
-                                    {
-                                    <InputRadio Value="0" /><span>Decrease/Icrease values in other days</span><br /> // for editing
-                                    <InputRadio Value="1" /><span>Increase/decrease goal total value</span>
-                                    }
-                                    else
-                                    {
-                                    <InputRadio Value="0" /><span>Decrease values in other days</span><br /> // for creating day
-                                    <InputRadio Value="1" /><span>Increace goal total value</span>
-                                    }
-                            </InputRadioGroup>
+                                {
+                                <InputRadio Value="0" />
+
+                                <span>Decrease/Increase values in other days</span>
+
+                                <br />
+                                // for editing
+                                <InputRadio Value="1" />
+
+                                <span>Increase/Decrease goal total value</span>
+                                }
+                                else
+                                {
+                                <InputRadio Value="0" />
+
+                                <span>Decrease values in other days</span>
+
+                                <br />
+                                // for creating day
+                                <InputRadio Value="1" />
+
+                                <span>Increace goal total value</span>
+                                }
+                        </InputRadioGroup>
                         }
                     </div>
 
@@ -72,7 +88,9 @@
                         @if (isWorkingWithMultiple && isInEdit)
                         {
                             <snap style="font-style:italic"> Should be Edited</snap>
-                            <InputCheckbox @bind-Value=modifyDuration></InputCheckbox><br />
+                            <InputCheckbox @bind-Value=modifyDuration></InputCheckbox>
+
+                            <br />
                         }
 
                         @if (modifyDuration)
@@ -81,8 +99,12 @@
                             <br />
                             @if (!tempGoalDay.IsAllDay)
                             {
-                                <span>Starting Time </span><InputText type="time" @bind-Value="@StartDateProxy" />
-                                <span>Length of session </span><InputText type="time" @bind-Value="@LengthTimeProxy" />
+                                <span>Starting Time </span>
+
+                                <InputText type="time" @bind-Value="@StartDateProxy" />
+                                <span>Length of session </span>
+
+                                <InputText type="time" @bind-Value="@LengthTimeProxy" />
                             }
                         }
                     </div>
@@ -91,7 +113,9 @@
                         @if (isWorkingWithMultiple && isInEdit)
                         {
                             <snap style="font-style:italic"> Should be Edited</snap>
-                            <InputCheckbox @bind-Value=modifyNote></InputCheckbox><br />
+                            <InputCheckbox @bind-Value=modifyNote></InputCheckbox>
+
+                            <br />
                         }
                         @if (modifyNote)
                         {
@@ -104,7 +128,7 @@
             <div class="modal-footer">
                 @if (isInEdit)
                 {
-                    <button type="button" class="btn btn-primary" @onclick="() => SaveGoalDay()">Confirm changes</button>
+                    <button id="confirm-changes" type="button" class="btn btn-primary" @onclick="SaveGoalDay">Confirm changes</button>
                     @if (!isWorkingWithMultiple)
                     {
                         <button type="button" class="btn btn-danger" @onclick="() => ShowRemoveDialog()">Remove day</button>
@@ -308,7 +332,6 @@
         recalculateMode = 0;
         isRemoveDialogVisible = false;
     }
-
 
 
     public void Open()

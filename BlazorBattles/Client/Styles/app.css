@@ -1,0 +1,15 @@
+﻿@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+.goalDay {
+    @apply bg-blue-300 hover:bg-blue-400 border-2 hover:border-gray-400 border-gray-200 cursor-pointer;
+}
+
+.notGoalDay {
+    @apply bg-stone-100 hover:bg-stone-200 border-dashed border-2 hover:border-gray-800 border-gray-400 cursor-pointer;
+}
+
+.outOfRange {
+    @apply bg-white border-0 border-gray-200 text-gray-400;
+}
